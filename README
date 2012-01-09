@@ -1,0 +1,4 @@
+PxLoader is a Javascript library that helps you download images, sound files or anything else you need before you take a specific action on your site (like showing a user interface or starting a game). You can use it to create a preloader for HTML5 games and websites.
+
+Details and examples:
+http://thinkpixellab.com/pxloader/
