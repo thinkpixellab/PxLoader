@@ -127,8 +127,8 @@ function PxLoader(settings) {
         // trigger requests for each resource
         for (var i = 0, len = entries.length; i < len; i++) {
             var entry = entries[i];
-            entry.resource.start(this);
             entry.status = ResourceState.WAITING;
+            entry.resource.start(this);
         }
 
         // do an initial status check soon since items may be loaded from the cache
