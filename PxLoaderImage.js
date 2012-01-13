@@ -31,7 +31,7 @@ function PxLoaderImage(url, tags, priority) {
     var removeEventHandlers = function() {
         self.img.removeEventListener('load', onLoad);
         self.img.removeEventListener('readystatechange', onReadyStateChange);
-        self.img.removeEventListener('load', onError);
+        self.img.removeEventListener('error', onError);
     };
 
     this.start = function(pxLoader) {
