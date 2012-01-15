@@ -29,9 +29,9 @@ function PxLoaderImage(url, tags, priority) {
     };
 
     var removeEventHandlers = function() {
-        self.img.removeEventListener('load', onLoad);
-        self.img.removeEventListener('readystatechange', onReadyStateChange);
-        self.img.removeEventListener('error', onError);
+        self.unbind('load', onLoad);
+        self.unbind('readystatechange', onReadyStateChange);
+        self.unbind('load', onError);
     };
 
     this.start = function(pxLoader) {
@@ -41,9 +41,9 @@ function PxLoaderImage(url, tags, priority) {
         // NOTE: Must add event listeners before the src is set. We
         // also need to use the readystatechange because sometimes
         // load doesn't fire when an image is in the cache.
-        self.img.addEventListener('load', onLoad);
-        self.img.addEventListener('readystatechange', onReadyStateChange);
-        self.img.addEventListener('error', onError);
+        self.bind('load', onLoad);
+        self.bind('readystatechange', onReadyStateChange);
+        self.bind('error', onError);
 
         self.img.src = url;
     };
@@ -72,6 +72,25 @@ function PxLoaderImage(url, tags, priority) {
     this.getName = function() {
         return url;
     }
+    
+	// cross-browser event binding
+    this.bind = function(eventName, eventHandler) {
+        if (self.img.addEventListener) {
+            self.img.addEventListener(eventName, eventHandler, false); 
+        } else if (self.img.attachEvent) {
+            self.img.attachEvent('on'+eventName, eventHandler);
+        }
+    }
+
+	// cross-browser event un-binding
+    this.unbind = function(eventName, eventHandler) {
+        if (self.img.removeEventListener) {
+            self.img.removeEventListener(eventName, eventHandler); 
+        } else if (self.img.detachEvent) {
+            self.img.detachEvent('on'+eventName, eventHandler);
+        }
+    }
+
 }
 
 // add a convenience method to PxLoader for adding an image
