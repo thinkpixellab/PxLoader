@@ -4,7 +4,7 @@
  * PxLoader plugin to load images
  */
 function PxLoaderImage(url, tags, priority) {
-    var self = this;
+    var self = this,
         loader = null;
 
     this.img = new Image();

@@ -4,7 +4,7 @@
  * PxLoader plugin to load sound using SoundManager2
  */
 function PxLoaderSound(id, url, tags, priority) {
-    var self = this;
+    var self = this,
         loader = null;
 
     this.tags = tags;
@@ -60,8 +60,10 @@ function PxLoaderSound(id, url, tags, priority) {
                 break;
             case 2: // failed/error
                 loader.onError(self);
+                break;
             case 3: // loaded/success
                 loader.onLoad(self);
+                break;
         }
     };
 
