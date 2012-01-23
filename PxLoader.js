@@ -114,6 +114,7 @@ function PxLoader(settings) {
             // now check priority
             if (a.priority < b.priority) return -1;
             if (a.priority > b.priority) return 1;
+            return 0;
         }
     };
 
