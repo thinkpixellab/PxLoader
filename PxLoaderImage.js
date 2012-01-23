@@ -71,7 +71,7 @@ function PxLoaderImage(url, tags, priority) {
     // returns a name for the resource that can be used in logging
     this.getName = function() {
         return url;
-    }
+    };
     
 	// cross-browser event binding
     this.bind = function(eventName, eventHandler) {
@@ -80,7 +80,7 @@ function PxLoaderImage(url, tags, priority) {
         } else if (self.img.attachEvent) {
             self.img.attachEvent('on'+eventName, eventHandler);
         }
-    }
+    };
 
 	// cross-browser event un-binding
     this.unbind = function(eventName, eventHandler) {
@@ -89,7 +89,7 @@ function PxLoaderImage(url, tags, priority) {
         } else if (self.img.detachEvent) {
             self.img.detachEvent('on'+eventName, eventHandler);
         }
-    }
+    };
 
 }
 
