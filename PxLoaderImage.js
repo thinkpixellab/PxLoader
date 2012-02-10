@@ -85,7 +85,7 @@ function PxLoaderImage(url, tags, priority) {
 	// cross-browser event un-binding
     this.unbind = function(eventName, eventHandler) {
         if (self.img.removeEventListener) {
-            self.img.removeEventListener(eventName, eventHandler); 
+            self.img.removeEventListener(eventName, eventHandler, false);
         } else if (self.img.detachEvent) {
             self.img.detachEvent('on'+eventName, eventHandler);
         }
