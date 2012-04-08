@@ -55,8 +55,8 @@ function PxLoader(settings) {
     // add an entry to the list of resources to be loaded
     this.add = function(resource) {
 
-        // ensure tags are in an array
-        resource.tags = ensureArray(resource.tags);
+        // ensure tags are in an object
+        resource.tags = new PxLoaderTags(resource.tags);
 
         // ensure priority is set
         if (resource.priority == null) {
@@ -72,13 +72,13 @@ function PxLoader(settings) {
     this.addProgressListener = function(callback, tags) {
         progressListeners.push({
             callback: callback,
-            tags: ensureArray(tags)
+            tags: new PxLoaderTags(tags)
         });
     };
 
     this.addCompletionListener = function(callback, tags) {
         progressListeners.push({
-            tags: ensureArray(tags),
+            tags: new PxLoaderTags(tags),
             callback: function(e) {
                 if (e.completedCount === e.totalCount) {
                     callback();
@@ -95,11 +95,14 @@ function PxLoader(settings) {
         var getTagOrder = function(entry) {
             var resource = entry.resource,
                 bestIndex = Infinity;
-            for (var i = 0, len = resource.tags.length; i < len; i++) {
-                var index = orderedTags.indexOf(resource.tags[i]);
-                if (index >= 0 && index < bestIndex) {
-                    bestIndex = index;
-                }
+            for (var i = 0; i < resource.tags.length; i++) {
+                for (var j = 0; j < Math.min(orderedTags.length, bestIndex); j++) {
+		            if(resource.tags[i] == orderedTags[j] && j < bestIndex) {
+			            bestIndex = j;
+			            if (bestIndex === 0) break;
+		            }
+		            if (bestIndex === 0) break;
+	            }
             }
             return bestIndex;
         };
@@ -182,16 +185,6 @@ function PxLoader(settings) {
         return false;
     };
 
-    // helper which returns true if two arrays share at least one item
-    var arraysIntersect = function(a, b) {
-        for (var i = 0, len = a.length; i < len; i++) {
-            if (b.indexOf(a[i]) >= 0) {
-                return true;
-            }
-        }
-        return false;
-    };
-
     var onProgress = function(resource, statusType) {
         // find the entry for the resource
         var entry = null;
@@ -222,7 +215,7 @@ function PxLoader(settings) {
             }
             else {
                 // listener only wants to hear about certain tags
-                shouldCall = arraysIntersect(resource.tags, listener.tags);
+                shouldCall = resource.tags.contains(listener.tags);
             }
 
             if (shouldCall) {
@@ -248,14 +241,14 @@ function PxLoader(settings) {
             total = 0;
         for (var i = 0, len = entries.length; i < len; i++) {
             var entry = entries[i],
-                includeResource;
+                includeResource = false;
 
             if (listener.tags.length === 0) {
                 // no tags specified so always tell the listener
                 includeResource = true;
             }
             else {
-                includeResource = arraysIntersect(entry.resource.tags, listener.tags);
+                includeResource = entry.resource.tags.contains(listener.tags);
             }
 
             if (includeResource) {
@@ -326,45 +319,64 @@ function PxLoader(settings) {
     };
 }
 
+
+// Tag object to handle tag intersection; once created not meant to be changed
+// Performance rationale: http://jsperf.com/lists-indexof-vs-in-operator/3
+function PxLoaderTags(values) {
+
+	this.array = [];
+	this.object = {};
+	this.value = null;      // single value
+	this.length = 0;
+
+	if (values !== null && values !== undefined) {
+		if(Array.isArray(values)) {
+			this.array = values;
+		} else if(typeof values === 'object') {
+			for(var key in values) {
+				this.array.push(key);
+			}
+		} else {
+			this.array.push(values);
+			this.value = values;
+		}
+
+		this.length = this.array.length;
+
+		// convert array values to object with truthy values, used by contains function below
+		for(var i = 0; i < this.length; i++) {
+			this.object[this.array[i]] = true;
+		}
+	}
+
+	// compare this object with another; return true if they share at least one value
+	this.contains = function(other) {
+		if(this.length === 0 || other.length === 0) {
+			return false;
+		} else if(this.length === 1) {
+			if (other.length === 1) {
+				return this.value === other.value;
+			} else {
+				return other.object.hasOwnProperty(this.value);
+			}
+		} else if(other.length < this.length) {
+			return other.contains(this);    // better to loop through the smaller object
+		} else {
+			for(var key in this.object) {
+				if(other.object[key]) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+}
+
 // shims to ensure we have newer Array utility methods
 
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
 if (!Array.isArray) {
-    Array.isArray = function(arg) {
-        return Object.prototype.toString.call(arg) == '[object Array]';
-    };
-}
-
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function(searchElement /*, fromIndex */) {
-        "use strict";
-        if (this == null) {
-            throw new TypeError();
-        }
-        var t = Object(this);
-        var len = t.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        var n = 0;
-        if (arguments.length > 0) {
-            n = Number(arguments[1]);
-            if (n != n) { // shortcut for verifying if it's NaN
-                n = 0;
-            } else if (n != 0 && n != Infinity && n != -Infinity) {
-                n = (n > 0 || -1) * Math.floor(Math.abs(n));
-            }
-        }
-        if (n >= len) {
-            return -1;
-        }
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) {
-                return k;
-            }
-        }
-        return -1;
-    };
+	Array.isArray = function(arg) {
+		return Object.prototype.toString.call(arg) == '[object Array]';
+	};
 }
