@@ -65,7 +65,7 @@ function PxLoader(settings) {
 
         entries.push({
             resource: resource,
-            state: ResourceState.QUEUED
+            status: ResourceState.QUEUED
         });
     };
 
