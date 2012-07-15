@@ -1,8 +1,8 @@
 // @depends PxLoader.js
-
 /**
  * PxLoader plugin to load images
  */
+
 function PxLoaderImage(url, tags, priority) {
     var self = this,
         loader = null;
@@ -11,7 +11,7 @@ function PxLoaderImage(url, tags, priority) {
     this.tags = tags;
     this.priority = priority;
 
-    var onReadyStateChange = function () {
+    var onReadyStateChange = function() {
         if (self.img.readyState == 'complete') {
             removeEventHandlers();
             loader.onLoad(self);
@@ -62,8 +62,7 @@ function PxLoaderImage(url, tags, priority) {
         removeEventHandlers();
         if (self.img.complete) {
             loader.onLoad(self);
-        }
-        else {
+        } else {
             loader.onTimeout(self);
         }
     };
@@ -72,22 +71,22 @@ function PxLoaderImage(url, tags, priority) {
     this.getName = function() {
         return url;
     };
-    
-	// cross-browser event binding
+
+    // cross-browser event binding
     this.bind = function(eventName, eventHandler) {
         if (self.img.addEventListener) {
-            self.img.addEventListener(eventName, eventHandler, false); 
+            self.img.addEventListener(eventName, eventHandler, false);
         } else if (self.img.attachEvent) {
-            self.img.attachEvent('on'+eventName, eventHandler);
+            self.img.attachEvent('on' + eventName, eventHandler);
         }
     };
 
-	// cross-browser event un-binding
+    // cross-browser event un-binding
     this.unbind = function(eventName, eventHandler) {
         if (self.img.removeEventListener) {
             self.img.removeEventListener(eventName, eventHandler, false);
         } else if (self.img.detachEvent) {
-            self.img.detachEvent('on'+eventName, eventHandler);
+            self.img.detachEvent('on' + eventName, eventHandler);
         }
     };
 

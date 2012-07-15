@@ -1,8 +1,8 @@
 // @depends PxLoader.js
-
 /**
  * PxLoader plugin to load sound using SoundManager2
  */
+
 function PxLoaderSound(id, url, tags, priority) {
     var self = this,
         loader = null;
@@ -13,12 +13,16 @@ function PxLoaderSound(id, url, tags, priority) {
         'id': id,
         'url': url,
         'autoLoad': false,
-        'onload': function() { loader.onLoad(self); },
+        'onload': function() {
+            loader.onLoad(self);
+        },
 
         // HTML5-only event: Fires when a browser has chosen to stop downloading.
         // "The user agent is intentionally not currently fetching media data,
         // but does not have the entire media resource downloaded."
-        'onsuspend': function() { loader.onTimeout(self); },
+        'onsuspend': function() {
+            loader.onTimeout(self);
+        },
 
         // Fires at a regular interval when a sound is loading and new data
         // has been received.
@@ -27,7 +31,6 @@ function PxLoaderSound(id, url, tags, priority) {
                 bytesTotal = this['bytesTotal'];
 
             // TODO: provide percentage complete updates to loader?
-
             // see if we have loaded the file
             if (bytesLoaded > 0 && (bytesLoaded === bytesTotal)) {
                 loader.onLoad(self);
@@ -47,21 +50,25 @@ function PxLoaderSound(id, url, tags, priority) {
         var iDevice = navigator.userAgent.match(/(ipad|iphone|ipod)/i);
         if (iDevice) {
             loader.onTimeout(self);
-        }
-        else {
+        } else {
             this.sound['load']();
         }
     };
 
     this.checkStatus = function() {
         switch(self.sound['readyState']) {
-            case 0: // uninitialised
-            case 1: // loading
+            case 0:
+                // uninitialised
                 break;
-            case 2: // failed/error
+            case 1:
+                // loading
+                break;
+            case 2:
+                // failed/error
                 loader.onError(self);
                 break;
-            case 3: // loaded/success
+            case 3:
+                // loaded/success
                 loader.onLoad(self);
                 break;
         }

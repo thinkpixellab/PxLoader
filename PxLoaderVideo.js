@@ -1,8 +1,8 @@
 // @depends PxLoader.js
-
 /**
  * PxLoader plugin to load video elements
  */
+
 function PxLoaderVideo(url, tags, priority) {
     var self = this;
     var loader = null;
@@ -16,7 +16,7 @@ function PxLoaderVideo(url, tags, priority) {
     this.tags = tags;
     this.priority = priority;
 
-    var onReadyStateChange = function () {
+    var onReadyStateChange = function() {
         if (self.vid.readyState != 4) {
             return;
         }
@@ -81,21 +81,21 @@ function PxLoaderVideo(url, tags, priority) {
         return url;
     };
 
-   // cross-browser event binding
+    // cross-browser event binding
     this.bind = function(eventName, eventHandler) {
         if (self.vid.addEventListener) {
             self.vid.addEventListener(eventName, eventHandler, false);
         } else if (self.vid.attachEvent) {
-            self.vid.attachEvent('on'+eventName, eventHandler);
+            self.vid.attachEvent('on' + eventName, eventHandler);
         }
     };
 
-   // cross-browser event un-binding
+    // cross-browser event un-binding
     this.unbind = function(eventName, eventHandler) {
         if (self.vid.removeEventListener) {
             self.vid.removeEventListener(eventName, eventHandler, false);
         } else if (self.vid.detachEvent) {
-            self.vid.detachEvent('on'+eventName, eventHandler);
+            self.vid.detachEvent('on' + eventName, eventHandler);
         }
     };
 

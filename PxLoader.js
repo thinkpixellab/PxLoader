@@ -2,6 +2,7 @@
  * PixelLab Resource Loader
  * Loads resources while providing progress updates.
  */
+
 function PxLoader(settings) {
 
     // merge settings with defaults
@@ -22,10 +23,10 @@ function PxLoader(settings) {
         settings.noProgressTimeout = Infinity; // do not stop waiting by default
     }
 
-    var entries = [], // holds resources to be loaded with their status
+    var entries = [],
+        // holds resources to be loaded with their status
         progressListeners = [],
-        timeStarted,
-        progressChanged = +new Date;
+        timeStarted, progressChanged = +new Date;
 
     /**
      * The status of a resource
@@ -49,7 +50,7 @@ function PxLoader(settings) {
             return val;
         }
 
-        return [ val ];
+        return [val];
     };
 
     // add an entry to the list of resources to be loaded
@@ -97,16 +98,15 @@ function PxLoader(settings) {
                 bestIndex = Infinity;
             for (var i = 0; i < resource.tags.length; i++) {
                 for (var j = 0; j < Math.min(orderedTags.length, bestIndex); j++) {
-		            if(resource.tags[i] == orderedTags[j] && j < bestIndex) {
-			            bestIndex = j;
-			            if (bestIndex === 0) break;
-		            }
-		            if (bestIndex === 0) break;
-	            }
+                    if (resource.tags[i] == orderedTags[j] && j < bestIndex) {
+                        bestIndex = j;
+                        if (bestIndex === 0) break;
+                    }
+                    if (bestIndex === 0) break;
+                }
             }
             return bestIndex;
         };
-
         return function(a, b) {
             // check tag order first
             var aOrder = getTagOrder(a),
@@ -152,14 +152,15 @@ function PxLoader(settings) {
             }
 
             // see if the resource has loaded
-            entry.resource.checkStatus();
+            if (entry.resource.checkStatus) {
+                entry.resource.checkStatus();
+            }
 
             // if still waiting, mark as timed out or make sure we check again
             if (entry.status === ResourceState.WAITING) {
                 if (timedOut) {
                     entry.resource.onTimeout();
-                }
-                else {
+                } else {
                     checkAgain = true;
                 }
             }
@@ -177,8 +178,7 @@ function PxLoader(settings) {
 
     this.isBusy = function() {
         for (var i = 0, len = entries.length; i < len; i++) {
-            if (entries[i].status === ResourceState.QUEUED ||
-                entries[i].status === ResourceState.WAITING) {
+            if (entries[i].status === ResourceState.QUEUED || entries[i].status === ResourceState.WAITING) {
                 return true;
             }
         }
@@ -188,7 +188,7 @@ function PxLoader(settings) {
     var onProgress = function(resource, statusType) {
         // find the entry for the resource
         var entry = null;
-        for(var i=0, len = entries.length; i < len; i++) {
+        for (var i = 0, len = entries.length; i < len; i++) {
             if (entries[i].resource === resource) {
                 entry = entries[i];
                 break;
@@ -212,8 +212,7 @@ function PxLoader(settings) {
             if (listener.tags.length === 0) {
                 // no tags specified so always tell the listener
                 shouldCall = true;
-            }
-            else {
+            } else {
                 // listener only wants to hear about certain tags
                 shouldCall = resource.tags.contains(listener.tags);
             }
@@ -246,16 +245,13 @@ function PxLoader(settings) {
             if (listener.tags.length === 0) {
                 // no tags specified so always tell the listener
                 includeResource = true;
-            }
-            else {
+            } else {
                 includeResource = entry.resource.tags.contains(listener.tags);
             }
 
             if (includeResource) {
                 total++;
-                if (entry.status === ResourceState.LOADED ||
-                    entry.status === ResourceState.ERROR ||
-                    entry.status === ResourceState.TIMEOUT) {
+                if (entry.status === ResourceState.LOADED || entry.status === ResourceState.ERROR || entry.status === ResourceState.TIMEOUT) {
                     completed++;
                 }
             }
@@ -319,64 +315,63 @@ function PxLoader(settings) {
     };
 }
 
-
 // Tag object to handle tag intersection; once created not meant to be changed
 // Performance rationale: http://jsperf.com/lists-indexof-vs-in-operator/3
+
 function PxLoaderTags(values) {
 
-	this.array = [];
-	this.object = {};
-	this.value = null;      // single value
-	this.length = 0;
+    this.array = [];
+    this.object = {};
+    this.value = null; // single value
+    this.length = 0;
 
-	if (values !== null && values !== undefined) {
-		if(Array.isArray(values)) {
-			this.array = values;
-		} else if(typeof values === 'object') {
-			for(var key in values) {
-				this.array.push(key);
-			}
-		} else {
-			this.array.push(values);
-			this.value = values;
-		}
+    if (values !== null && values !== undefined) {
+        if (Array.isArray(values)) {
+            this.array = values;
+        } else if (typeof values === 'object') {
+            for (var key in values) {
+                this.array.push(key);
+            }
+        } else {
+            this.array.push(values);
+            this.value = values;
+        }
 
-		this.length = this.array.length;
+        this.length = this.array.length;
 
-		// convert array values to object with truthy values, used by contains function below
-		for(var i = 0; i < this.length; i++) {
-			this.object[this.array[i]] = true;
-		}
-	}
+        // convert array values to object with truthy values, used by contains function below
+        for (var i = 0; i < this.length; i++) {
+            this.object[this.array[i]] = true;
+        }
+    }
 
-	// compare this object with another; return true if they share at least one value
-	this.contains = function(other) {
-		if(this.length === 0 || other.length === 0) {
-			return false;
-		} else if(this.length === 1) {
-			if (other.length === 1) {
-				return this.value === other.value;
-			} else {
-				return other.object.hasOwnProperty(this.value);
-			}
-		} else if(other.length < this.length) {
-			return other.contains(this);    // better to loop through the smaller object
-		} else {
-			for(var key in this.object) {
-				if(other.object[key]) {
-					return true;
-				}
-			}
-			return false;
-		}
-	}
+    // compare this object with another; return true if they share at least one value
+    this.contains = function(other) {
+        if (this.length === 0 || other.length === 0) {
+            return false;
+        } else if (this.length === 1) {
+            if (other.length === 1) {
+                return this.value === other.value;
+            } else {
+                return other.object.hasOwnProperty(this.value);
+            }
+        } else if (other.length < this.length) {
+            return other.contains(this); // better to loop through the smaller object
+        } else {
+            for (var key in this.object) {
+                if (other.object[key]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 }
 
 // shims to ensure we have newer Array utility methods
-
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
 if (!Array.isArray) {
-	Array.isArray = function(arg) {
-		return Object.prototype.toString.call(arg) == '[object Array]';
-	};
+    Array.isArray = function(arg) {
+        return Object.prototype.toString.call(arg) == '[object Array]';
+    };
 }
