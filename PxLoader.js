@@ -349,7 +349,7 @@ function PxLoaderTags(values) {
     this.contains = function(other) {
         if (this.length === 0 || other.length === 0) {
             return false;
-        } else if (this.length === 1) {
+        } else if (this.length === 1 && this.value !== null) {
             if (other.length === 1) {
                 return this.value === other.value;
             } else {
