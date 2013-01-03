@@ -5,7 +5,7 @@ http://thinkpixellab.com/pxloader/
 
 AMD
 ---
-For people using asynchronous module definitions like RequireJS, AMD-ified modules have been included.  Please see the dependency list in pxloader.js and match the paths to the config in your project.  For Image/Sound/Video, it's just a matter of uncommenting in the dependency list. (added @nick-jonas)
+For people using asynchronous module definitions like RequireJS, AMD-ified modules have been included.  Please see the dependency list in pxloader.js and match the paths to the config in your project.  For Image/Sound/Video, it's just a matter of uncommenting in the dependency list. (added by @nick-jonas)
 
 
 The MIT License
