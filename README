@@ -3,6 +3,12 @@ PxLoader is a Javascript library that helps you download images, sound files or 
 Details and examples:
 http://thinkpixellab.com/pxloader/
 
+#AMD
+---
+
+For people using asynchronous module definitions like RequireJS, AMD-ified modules have been included.  Please see the dependency list in pxloader.js and match the paths to the config in your project.  For Image/Sound/Video, it's just a matter of uncommenting in the dependency list.
+
+
 The MIT License
 
 Copyright (c) 2012 Pixel Lab
