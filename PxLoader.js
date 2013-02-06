@@ -7,6 +7,7 @@ function PxLoader(settings) {
 
     // merge settings with defaults
     settings = settings || {};
+    this.settings = settings;
 
     // how frequently we poll resources for progress
     if (settings.statusInterval == null) {
