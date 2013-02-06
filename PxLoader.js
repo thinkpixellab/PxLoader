@@ -307,7 +307,7 @@ function PxLoader(settings) {
             }
 
             if (entry.resource.tags.length > 0) {
-                message += ' Tags: [' + entry.resource.tags.join(',') + ']';
+                message += ' Tags: [' + entry.resource.tags.array.join(',') + ']';
             }
 
             window.console.log(message);
