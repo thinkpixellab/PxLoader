@@ -82,7 +82,7 @@ function PxLoader(settings) {
             tags: new PxLoaderTags(tags),
             callback: function(e) {
                 if (e.completedCount === e.totalCount) {
-                    callback();
+                    callback(e);
                 }
             }
         });
