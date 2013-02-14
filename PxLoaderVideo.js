@@ -109,3 +109,10 @@ PxLoader.prototype.addVideo = function(url, tags, priority) {
     // return the vid element to the caller
     return videoLoader.vid;
 };
+
+// AMD module support
+if (typeof define === 'function' && define.amd) {
+    define('PxLoaderVideo', [], function() {
+        return PxLoaderVideo;
+    });
+}

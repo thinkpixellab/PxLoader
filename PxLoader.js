@@ -369,6 +369,13 @@ function PxLoaderTags(values) {
     }
 }
 
+// AMD module support
+if (typeof define === 'function' && define.amd) {
+    define('PxLoader', [], function() {
+        return PxLoader;
+    });
+}
+
 // shims to ensure we have newer Array utility methods
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
 if (!Array.isArray) {
@@ -376,3 +383,6 @@ if (!Array.isArray) {
         return Object.prototype.toString.call(arg) == '[object Array]';
     };
 }
+
+
+

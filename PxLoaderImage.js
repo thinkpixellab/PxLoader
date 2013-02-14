@@ -100,3 +100,10 @@ PxLoader.prototype.addImage = function(url, tags, priority) {
     // return the img element to the caller
     return imageLoader.img;
 };
+
+// AMD module support
+if (typeof define === 'function' && define.amd) {
+    define('PxLoaderImage', [], function() {
+        return PxLoaderImage;
+    });
+}

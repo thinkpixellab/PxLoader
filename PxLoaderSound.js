@@ -89,3 +89,10 @@ PxLoader.prototype.addSound = function(id, url, tags, priority) {
     this.add(soundLoader);
     return soundLoader.sound;
 };
+
+// AMD module support
+if (typeof define === 'function' && define.amd) {
+    define('PxLoaderSound', [], function() {
+        return PxLoaderSound;
+    });
+}
