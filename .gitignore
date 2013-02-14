@@ -1,0 +1,3 @@
+# Exclude compiled versions
+pxloader-all.js
+pxloader-all.min.js
