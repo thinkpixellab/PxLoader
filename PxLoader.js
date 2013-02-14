@@ -27,7 +27,7 @@ function PxLoader(settings) {
     var entries = [],
         // holds resources to be loaded with their status
         progressListeners = [],
-        timeStarted, progressChanged = +new Date;
+        timeStarted, progressChanged = Date.now();
 
     /**
      * The status of a resource
@@ -123,7 +123,7 @@ function PxLoader(settings) {
     };
 
     this.start = function(orderedTags) {
-        timeStarted = +new Date;
+        timeStarted = Date.now();
 
         // first order the resources
         var compareResources = getResourceSort(orderedTags);
@@ -142,7 +142,7 @@ function PxLoader(settings) {
 
     var statusCheck = function() {
         var checkAgain = false,
-            noProgressTime = (+new Date) - progressChanged,
+            noProgressTime = Date.now() - progressChanged,
             timedOut = (noProgressTime >= settings.noProgressTimeout),
             shouldLog = (noProgressTime >= settings.loggingDelay);
 
@@ -201,7 +201,7 @@ function PxLoader(settings) {
             return;
         }
         entry.status = statusType;
-        progressChanged = +new Date;
+        progressChanged = Date.now();
 
         var numResourceTags = resource.tags.length;
 
@@ -279,7 +279,7 @@ function PxLoader(settings) {
             return;
         }
 
-        var elapsedSeconds = Math.round((+new Date - timeStarted) / 1000);
+        var elapsedSeconds = Math.round((Date.now() - timeStarted) / 1000);
         window.console.log('PxLoader elapsed: ' + elapsedSeconds + ' sec');
 
         for (var i = 0, len = entries.length; i < len; i++) {
@@ -374,6 +374,13 @@ if (typeof define === 'function' && define.amd) {
     define('PxLoader', [], function() {
         return PxLoader;
     });
+}
+
+// Date.now() shim for older browsers
+if (!Date.now) {
+    Date.now = function now() {
+        return +(new Date);
+    };
 }
 
 // shims to ensure we have newer Array utility methods
