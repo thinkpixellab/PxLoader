@@ -1,8 +1,6 @@
-// @depends PxLoader.js
-/**
- * PxLoader plugin to load video elements
- */
+/*global PxLoader: true, define: true, Video: true */ 
 
+// PxLoader plugin to load video elements
 function PxLoaderVideo(url, tags, priority) {
     var self = this;
     var loader = null;
@@ -17,7 +15,7 @@ function PxLoaderVideo(url, tags, priority) {
     this.priority = priority;
 
     var onReadyStateChange = function() {
-        if (self.vid.readyState != 4) {
+        if (self.vid.readyState !== 4) {
             return;
         }
 
@@ -58,7 +56,7 @@ function PxLoaderVideo(url, tags, priority) {
     // called by PxLoader to check status of video (fallback in case
     // the event listeners are not triggered).
     this.checkStatus = function() {
-        if (self.vid.readyState != 4) {
+        if (self.vid.readyState !== 4) {
             return;
         }
 
@@ -69,7 +67,7 @@ function PxLoaderVideo(url, tags, priority) {
     // called by PxLoader when it is no longer waiting
     this.onTimeout = function() {
         removeEventHandlers();
-        if (self.vid.readyState != 4) {
+        if (self.vid.readyState !== 4) {
             loader.onLoad(self);
         } else {
             loader.onTimeout(self);

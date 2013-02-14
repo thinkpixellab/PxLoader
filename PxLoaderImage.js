@@ -1,8 +1,6 @@
-// @depends PxLoader.js
-/**
- * PxLoader plugin to load images
- */
+/*global PxLoader: true, define: true */ 
 
+// PxLoader plugin to load images
 function PxLoaderImage(url, tags, priority) {
     var self = this,
         loader = null;
@@ -12,7 +10,7 @@ function PxLoaderImage(url, tags, priority) {
     this.priority = priority;
 
     var onReadyStateChange = function() {
-        if (self.img.readyState == 'complete') {
+        if (self.img.readyState === 'complete') {
             removeEventHandlers();
             loader.onLoad(self);
         }

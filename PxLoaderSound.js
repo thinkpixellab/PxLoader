@@ -1,8 +1,6 @@
-// @depends PxLoader.js
-/**
- * PxLoader plugin to load sound using SoundManager2
- */
+/*global PxLoader: true, define: true, soundManager: true */ 
 
+// PxLoader plugin to load sound using SoundManager2
 function PxLoaderSound(id, url, tags, priority) {
     var self = this,
         loader = null;
@@ -80,7 +78,7 @@ function PxLoaderSound(id, url, tags, priority) {
 
     this.getName = function() {
         return url;
-    }
+    };
 }
 
 // add a convenience method to PxLoader for adding a sound
