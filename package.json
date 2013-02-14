@@ -1,0 +1,14 @@
+{
+  "name": "pxloader-all",
+  "title": "PxLoader",
+  "homepage": "http://thinkpixellab.com/PxLoader",
+  "author": {
+    "name": "Pixel Lab",
+    "url": "http://thinkpixellab.com"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "latest"
+  },
+  "keywords": []
+}
