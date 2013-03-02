@@ -60,7 +60,8 @@
         // add an entry to the list of resources to be loaded
         this.add = function(resource) {
 
-            // ensure tags are in an object
+            // TODO: would be better to create a base class for all resources and
+            // initialize the PxLoaderTags there rather than overwritting tags here
             resource.tags = new PxLoaderTags(resource.tags);
 
             // ensure priority is set
@@ -102,7 +103,7 @@
                     bestIndex = Infinity;
                 for (var i = 0; i < resource.tags.length; i++) {
                     for (var j = 0; j < Math.min(orderedTags.length, bestIndex); j++) {
-                        if (resource.tags[i] === orderedTags[j] && j < bestIndex) {
+                        if (resource.tags.all[i] === orderedTags[j] && j < bestIndex) {
                             bestIndex = j;
                             if (bestIndex === 0) {
                                 break;
@@ -224,7 +225,7 @@
                     shouldCall = true;
                 } else {
                     // listener only wants to hear about certain tags
-                    shouldCall = resource.tags.contains(listener.tags);
+                    shouldCall = resource.tags.intersects(listener.tags);
                 }
 
                 if (shouldCall) {
@@ -258,7 +259,7 @@
                     // no tags specified so always tell the listener
                     includeResource = true;
                 } else {
-                    includeResource = entry.resource.tags.contains(listener.tags);
+                    includeResource = entry.resource.tags.intersects(listener.tags);
                 }
 
                 if (includeResource) {
@@ -322,7 +323,7 @@
                 }
 
                 if (entry.resource.tags.length > 0) {
-                    message += ' Tags: [' + entry.resource.tags.array.join(',') + ']';
+                    message += ' Tags: [' + entry.resource.tags.all.join(',') + ']';
                 }
 
                 window.console.log(message);
@@ -336,52 +337,68 @@
      
     function PxLoaderTags(values) {
      
-        this.array = [];
-        this.object = {};
-        this.value = null; // single value
+        this.all = [];
+        this.first = null; // cache the first value
         this.length = 0;
+
+        // holds values as keys for quick lookup
+        this.lookup = {};
      
-        if (values !== null && values !== undefined) {
+        if (values) {
+
+            // first fill the array of all values
             if (Array.isArray(values)) {
-                this.array = values;
+                // copy the array of values, just to be safe                
+                this.all = values.slice(0);
             } else if (typeof values === 'object') {
                 for (var key in values) {
-                    this.array.push(key);
+                    if(values.hasOwnProperty(key)) {
+                        this.all.push(key);
+                    }
                 }
             } else {
-                this.array.push(values);
-                this.value = values;
+                this.all.push(values);
+            }
+
+            // cache the length and the first value
+            this.length = this.all.length;
+            if (this.length > 0) {
+                this.first = this.all[0];
             }
      
-            this.length = this.array.length;
-     
-            // convert array values to object with truthy values, used by contains function below
+            // set values as object keys for quick lookup during intersection test
             for (var i = 0; i < this.length; i++) {
-                this.object[this.array[i]] = true;
+                this.lookup[this.all[i]] = true;
             }
         }
     }
 
     // compare this object with another; return true if they share at least one value
-    PxLoaderTags.prototype.contains = function(other) {
+    PxLoaderTags.prototype.intersects = function(other) {
+
+        // handle empty values case
         if (this.length === 0 || other.length === 0) {
             return false;
-        } else if (this.length === 1 && this.value !== null) {
-            if (other.length === 1) {
-                return this.value === other.value;
-            } else {
-                return other.object.hasOwnProperty(this.value);
-            }
-        } else if (other.length < this.length) {
-            return other.contains(this); // better to loop through the smaller object
-        } else {
-            for (var key in this.object) {
-                if (other.object[key]) {
-                    return true;
-                }
-            }
-            return false;
+        } 
+
+        // only a single value to compare?
+        if (this.length === 1 && other.length === 1) {
+            return this.first === other.first;
         }
+
+        // better to loop through the smaller object
+        if (other.length < this.length) {
+            return other.intersects(this); 
+        }
+         
+        // loop through every key to see if there are any matches
+        for (var key in this.lookup) {
+            if (other.lookup[key]) {
+                return true;
+            }
+        }
+
+        return false;
     };
 
     // AMD module support
