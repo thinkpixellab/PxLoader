@@ -130,18 +130,27 @@
             };
         };
 
-        this.start = function(orderedTags) {
+        this.start = function(orderedTags, specifiedTagsOnly) {
             timeStarted = Date.now();
 
             // first order the resources
-            var compareResources = getResourceSort(orderedTags);
+            var compareResources = getResourceSort(orderedTags),
+                tags = new PxLoaderTags(orderedTags),
+                i = 0, 
+                len = entries.length,
+                entry;
+
             entries.sort(compareResources);
 
             // trigger requests for each resource
-            for (var i = 0, len = entries.length; i < len; i++) {
-                var entry = entries[i];
-                entry.status = ResourceState.WAITING;
-                entry.resource.start(this);
+            for (; i < len; i++) {
+
+                entry = entries[i];
+                //when specifiedTagsOnly: only start resource if it has given tags
+                if( !specifiedTagsOnly || (specifiedTagsOnly && tags.intersects(entry.resource.tags)) ) {
+                    entry.status = ResourceState.WAITING;
+                    entry.resource.start(this);
+                }
             }
 
             // do an initial status check soon since items may be loaded from the cache
