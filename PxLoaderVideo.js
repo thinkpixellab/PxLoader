@@ -5,6 +5,8 @@ function PxLoaderVideo(url, tags, priority) {
     var self = this;
     var loader = null;
 
+    this.readyEventName = 'canplaythrough';
+
     try {
         this.vid = new Video();
     } catch(e) {
@@ -35,7 +37,7 @@ function PxLoaderVideo(url, tags, priority) {
 
     var removeEventHandlers = function() {
         self.unbind('load', onLoad);
-        self.unbind('canplaythrough', onReadyStateChange);
+        self.unbind(self.readyEventName, onReadyStateChange);
         self.unbind('error', onError);
     };
 
@@ -47,7 +49,7 @@ function PxLoaderVideo(url, tags, priority) {
         // also need to use the readystatechange because sometimes
         // load doesn't fire when an video is in the cache.
         self.bind('load', onLoad);
-        self.bind('canplaythrough', onReadyStateChange);
+        self.bind(self.readyEventName, onReadyStateChange);
         self.bind('error', onError);
 
         self.vid.src = url;
