@@ -53,6 +53,7 @@ function PxLoaderVideo(url, tags, priority) {
         self.bind('error', onError);
 
         self.vid.src = url;
+        self.vid.load();
     };
 
     // called by PxLoader to check status of video (fallback in case
