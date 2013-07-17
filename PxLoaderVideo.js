@@ -52,6 +52,10 @@ function PxLoaderVideo(url, tags, priority) {
         self.bind(self.readyEventName, onReadyStateChange);
         self.bind('error', onError);
 
+        // sometimes the browser will intentionally stop downloading
+        // the video. In that case we'll consider the video loaded
+        self.bind('suspend', onLoad);
+
         self.vid.src = url;
         self.vid.load();
     };
