@@ -5,6 +5,15 @@ function PxLoaderSound(id, url, tags, priority) {
     var self = this,
         loader = null;
 
+    // For iOS and Android, soundManager2 uses a global audio object so we 
+    // can't preload multiple sounds. We'll have to hope they load quickly
+    // when we need to play them. Unfortunately, SM2 doesn't expose
+    // a property to indicate its using a global object. For now we'll
+    // use the same tests they use.
+    var isIOS = navigator.userAgent.match(/(ipad|iphone|ipod)/i),
+        isAndroid = navigator.userAgent.match(/android/i);
+    this.useGlobalHTML5Audio = isIOS || isAndroid;
+
     this.tags = tags;
     this.priority = priority;
     this.sound = soundManager['createSound']({
@@ -40,13 +49,8 @@ function PxLoaderSound(id, url, tags, priority) {
         // we need the loader ref so we can notify upon completion
         loader = pxLoader;
 
-        // On iOS, soundManager2 uses a global audio object so we can't
-        // preload multiple sounds. We'll have to hope they load quickly
-        // when we need to play them. Unfortunately, SM2 doesn't expose
-        // a property to indicate its using a global object. For now we'll
-        // use the same test they do: only when on an iDevice
-        var iDevice = navigator.userAgent.match(/(ipad|iphone|ipod)/i);
-        if (iDevice) {
+        // can't preload when a single global audio element is used
+        if (this.useGlobalHTML5Audio) {
             loader.onTimeout(self);
         } else {
             this.sound['load']();
