@@ -1,6 +1,5 @@
-# Exclude compiled versions
-pxloader-all.js
-pxloader-all.min.js
-
 # Node modules
 node_modules
+
+# Sublime project
+*.sublime-*

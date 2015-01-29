@@ -1,6 +1,8 @@
 /*global module:false*/
 module.exports = function(grunt) {
 
+    var BANNER_TEMPLATE = '/*! <%= pkg.title %> v<%= pkg.version %> | <%= pkg.homepage %> */\n';
+
     var srcFiles = [
         'PxLoader.js',
         'PxLoaderImage.js',
@@ -8,13 +10,20 @@ module.exports = function(grunt) {
         'PxLoaderVideo.js'
     ];
 
-    // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         concat: {
-            dist: {
-                src: ['<banner>'].concat(srcFiles),
-                dest: '<%= pkg.name %>.js'
+            options: { banner: BANNER_TEMPLATE },
+            all: {
+                src: srcFiles,
+                dest: 'dist/pxloader-all.js'
+            },
+            images: {
+                src: [
+                    'PxLoader.js',
+                    'PxLoaderImage.js'
+                ],
+                dest: 'dist/pxloader-images.js'
             }
         },
         jshint: {
@@ -41,12 +50,14 @@ module.exports = function(grunt) {
             }
         },
         uglify: {
-            options: {
-                banner: '/*! <%= pkg.title %> | <%= pkg.homepage %> | <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+            options: { banner: BANNER_TEMPLATE },
+            all: {
+                src: ['<%= concat.all.dest %>'],
+                dest: 'dist/pxloader-all.min.js'
             },
-            dist: {
-                src: ['<%= concat.dist.dest %>'],
-                dest: '<%= pkg.name %>.min.js'
+            images: {
+                src: ['<%= concat.images.dest %>'],
+                dest: 'dist/pxloader-images.min.js'
             }
         }
     });
