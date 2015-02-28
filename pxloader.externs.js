@@ -61,8 +61,9 @@ PxLoader.prototype.addVideo = function(url, tags, priority) {};
  * @param {string} url
  * @param {string|Array} tags
  * @param {number} priority
+ * @param {string} origin
  */
-function PxLoaderImage(url, tags, priority) {}
+function PxLoaderImage(url, tags, priority, origin) {}
 /**
  * @param {PxLoader} pxLoader
  */
