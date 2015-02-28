@@ -39,8 +39,9 @@ PxLoader.prototype.log = function(showAll) {};
  * @param {string} url
  * @param {string|Array} tags
  * @param {number} priority
+ * @param {string} origin
  */
-PxLoader.prototype.addImage = function(url, tags, priority) {};
+PxLoader.prototype.addImage = function(url, tags, priority, origin) {};
 /**
  * @param {*} id
  * @param {string} url
@@ -98,8 +99,9 @@ PxLoaderSound.prototype.sound = {};
  * @param {string} url
  * @param {string|Array} tags
  * @param {number} priority
+ * @param {string} origin
  */
-function PxLoaderVideo(url, tags, priority) {}
+function PxLoaderVideo(url, tags, priority, origin) {}
 /**
  * @param {PxLoader} pxLoader
  */
