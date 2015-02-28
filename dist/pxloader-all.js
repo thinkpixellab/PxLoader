@@ -642,10 +642,10 @@ if (typeof define === 'function' && define.amd) {
         return PxLoaderSound;
     });
 }
-/*global PxLoader: true, define: true, Video: true */ 
+/*global PxLoader: true, define: true, Video: true */
 
 // PxLoader plugin to load video elements
-function PxLoaderVideo(url, tags, priority) {
+function PxLoaderVideo(url, tags, priority, origin) {
     var self = this;
     var loader = null;
 
@@ -657,6 +657,9 @@ function PxLoaderVideo(url, tags, priority) {
         this.vid = document.createElement('video');
     }
 
+    if(origin !== undefined) {
+        this.img.crossOrigin = origin;
+    }
     this.tags = tags;
     this.priority = priority;
 
@@ -751,8 +754,8 @@ function PxLoaderVideo(url, tags, priority) {
 }
 
 // add a convenience method to PxLoader for adding an image
-PxLoader.prototype.addVideo = function(url, tags, priority) {
-    var videoLoader = new PxLoaderVideo(url, tags, priority);
+PxLoader.prototype.addVideo = function(url, tags, priority, origin) {
+    var videoLoader = new PxLoaderVideo(url, tags, priority, origin);
     this.add(videoLoader);
 
     // return the vid element to the caller

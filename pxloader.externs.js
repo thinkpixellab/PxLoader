@@ -52,8 +52,9 @@ PxLoader.prototype.addSound = function(id, url, tags, priority) {};
  * @param {string} url
  * @param {string|Array} tags
  * @param {number} priority
+ * @param {string} origin
  */
-PxLoader.prototype.addVideo = function(url, tags, priority) {};
+PxLoader.prototype.addVideo = function(url, tags, priority, origin) {};
 
 /**
  * @constructor
