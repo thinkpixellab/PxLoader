@@ -432,14 +432,17 @@ if (!Array.isArray) {
 
 
 
-/*global PxLoader: true, define: true */ 
+/*global PxLoader: true, define: true */
 
 // PxLoader plugin to load images
-function PxLoaderImage(url, tags, priority) {
+function PxLoaderImage(url, tags, priority, origin) {
     var self = this,
         loader = null;
 
     this.img = new Image();
+    if(origin !== undefined) {
+        this.img.crossOrigin = origin;
+    }
     this.tags = tags;
     this.priority = priority;
 
@@ -525,8 +528,8 @@ function PxLoaderImage(url, tags, priority) {
 }
 
 // add a convenience method to PxLoader for adding an image
-PxLoader.prototype.addImage = function(url, tags, priority) {
-    var imageLoader = new PxLoaderImage(url, tags, priority);
+PxLoader.prototype.addImage = function(url, tags, priority, origin) {
+    var imageLoader = new PxLoaderImage(url, tags, priority, origin);
     this.add(imageLoader);
 
     // return the img element to the caller
@@ -639,10 +642,10 @@ if (typeof define === 'function' && define.amd) {
         return PxLoaderSound;
     });
 }
-/*global PxLoader: true, define: true, Video: true */ 
+/*global PxLoader: true, define: true, Video: true */
 
 // PxLoader plugin to load video elements
-function PxLoaderVideo(url, tags, priority) {
+function PxLoaderVideo(url, tags, priority, origin) {
     var self = this;
     var loader = null;
 
@@ -654,6 +657,9 @@ function PxLoaderVideo(url, tags, priority) {
         this.vid = document.createElement('video');
     }
 
+    if(origin !== undefined) {
+        this.img.crossOrigin = origin;
+    }
     this.tags = tags;
     this.priority = priority;
 
@@ -748,8 +754,8 @@ function PxLoaderVideo(url, tags, priority) {
 }
 
 // add a convenience method to PxLoader for adding an image
-PxLoader.prototype.addVideo = function(url, tags, priority) {
-    var videoLoader = new PxLoaderVideo(url, tags, priority);
+PxLoader.prototype.addVideo = function(url, tags, priority, origin) {
+    var videoLoader = new PxLoaderVideo(url, tags, priority, origin);
     this.add(videoLoader);
 
     // return the vid element to the caller
