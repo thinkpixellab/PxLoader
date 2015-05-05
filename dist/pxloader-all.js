@@ -658,7 +658,7 @@ function PxLoaderVideo(url, tags, priority, origin) {
     }
 
     if(origin !== undefined) {
-        this.img.crossOrigin = origin;
+        this.vid.crossOrigin = origin;
     }
     this.tags = tags;
     this.priority = priority;
