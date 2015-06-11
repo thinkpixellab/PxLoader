@@ -7,18 +7,6 @@ var PxLoaderData = function(url, tags, priority) {
   this.priority = priority;
 
   this.request = new XMLHttpRequest();
-  this.request.onload = this.onLoad;
-  this.request.onerror = this.onError;
-
-  // this.request.onreadystatechange = function () {
-  //   if (self.request.readyState === 4) {
-  //     if(self.request.status === 200){
-  //       loader.onLoad(self);
-  //     }else{
-  //       loader.onError(self);
-  //     }
-  //   }
-  // };
 
   // called by PxLoader to trigger download 
   this.start = function(pxLoader) {
@@ -31,6 +19,9 @@ var PxLoaderData = function(url, tags, priority) {
     // loader.onLoad(self);    // the resource loaded 
     // loader.onError(self);   // an error occured 
     // loader.onTimeout(self); // timeout while waiting 
+    
+    self.request.onload = this.onLoad;
+    self.request.onerror = this.onError;
 
     self.request.open('GET', url, true);
     self.request.send(null);
