@@ -7,7 +7,8 @@ module.exports = function(grunt) {
         'PxLoader.js',
         'PxLoaderImage.js',
         'PxLoaderSound.js',
-        'PxLoaderVideo.js'
+        'PxLoaderVideo.js',
+        'PxLoaderData.js'
     ];
 
     grunt.initConfig({
