@@ -65,12 +65,17 @@ var PxLoaderData = function(url, tags, priority) {
 
 // add a convenience method to PxLoader for adding a data
 PxLoader.prototype.addData = function(url, tags, priority) {
-    var dataLoader = new PxLoaderData(url, tags, priority);
+  var dataLoader = new PxLoaderData(url, tags, priority);
 
-    this.add(dataLoader);
+  this.add(dataLoader);
 
-    // return the request object to the caller
-    return dataLoader.request;
+  // return the request object to the caller
+  return dataLoader.request;
 };
 
-
+// AMD module support
+if (typeof define === 'function' && define.amd) {
+  define('PxLoaderData', [], function() {
+    return PxLoaderData;
+  });
+}
