@@ -1,3 +1,5 @@
+/*global PxLoader: true, define: true */
+
 var PxLoaderData = function(url, tags, priority) {
   var self = this;
   var loader = null;
@@ -60,4 +62,15 @@ var PxLoaderData = function(url, tags, priority) {
     return url;
   };
 };
+
+// add a convenience method to PxLoader for adding a data
+PxLoader.prototype.addData = function(url, tags, priority) {
+    var dataLoader = new PxLoaderData(url, tags, priority);
+
+    this.add(dataLoader);
+
+    // return the request object to the caller
+    return dataLoader.request;
+};
+
 
