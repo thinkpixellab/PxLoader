@@ -70,5 +70,3 @@ var PxLoaderData = function(url, tags, priority) {
   };
 };
 
-module.exports = PxLoaderData;
-
