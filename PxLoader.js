@@ -407,9 +407,14 @@
             return PxLoader;
         });
     }
-
-    // exports
-    global.PxLoader = PxLoader;
+    
+    if (module && module.exports) {
+        module.exports = PxLoader;
+    }
+    else {
+        // exports
+        global.PxLoader = PxLoader;
+    }
 
 }(this));
 
