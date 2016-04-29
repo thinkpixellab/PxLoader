@@ -1,4 +1,4 @@
-/*global define: true */ 
+/*global define: true, module: true */ 
 
 (function(global) {
 

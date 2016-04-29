@@ -1,7 +1,7 @@
 /*global module:false*/
 module.exports = function(grunt) {
 
-    var BANNER_TEMPLATE = '/*! <%= pkg.title %> v<%= pkg.version %> | <%= pkg.homepage %> */\n';
+    var BANNER_TEMPLATE = '/*! <%= pkg.title %> | <%= pkg.homepage %> */\n';
 
     var srcFiles = [
         'PxLoader.js',
@@ -33,7 +33,7 @@ module.exports = function(grunt) {
                 curly: true,
                 eqeqeq: true,
                 immed: true,
-                latedef: true,
+                latedef: false,
                 newcap: true,
                 noarg: true,
                 sub: true,

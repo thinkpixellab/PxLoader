@@ -1,5 +1,5 @@
-/*! PxLoader v1.0.0 | http://thinkpixellab.com/PxLoader */
-/*global define: true */ 
+/*! PxLoader | http://thinkpixellab.com/PxLoader */
+/*global define: true, module: true */ 
 
 (function(global) {
 
@@ -408,9 +408,14 @@
             return PxLoader;
         });
     }
-
-    // exports
-    global.PxLoader = PxLoader;
+    
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = PxLoader;
+    }
+    else {
+        // exports
+        global.PxLoader = PxLoader;
+    }
 
 }(this));
 
