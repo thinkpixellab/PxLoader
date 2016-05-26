@@ -89,20 +89,12 @@
 
         // cross-browser event binding
         this.bind = function(eventName, eventHandler) {
-            if (self.img.addEventListener) {
-                self.img.addEventListener(eventName, eventHandler, false);
-            } else if (self.img.attachEvent) {
-                self.img.attachEvent('on' + eventName, eventHandler);
-            }
+            self.img.addEventListener(eventName, eventHandler, false);
         };
 
         // cross-browser event un-binding
         this.unbind = function(eventName, eventHandler) {
-            if (self.img.removeEventListener) {
-                self.img.removeEventListener(eventName, eventHandler, false);
-            } else if (self.img.detachEvent) {
-                self.img.detachEvent('on' + eventName, eventHandler);
-            }
+            self.img.removeEventListener(eventName, eventHandler, false);
         };
 
     }
