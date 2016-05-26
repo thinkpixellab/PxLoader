@@ -1,12 +1,7 @@
 {
-  "name": "PxLoader",
-  "main": [
-		"PxLoader.js",
-		"PxLoaderImage.js",
-		"PxLoaderSound.js",
-		"PxLoaderVideo.js"
-	],
-  "version": "0.0.0",
+  "name": "pxloader",
+  "main": "PxLoader.js",
+  "version": "1.0.2",
   "homepage": "http://thinkpixellab.com/pxloader/",
   "authors": [
     "Pixel Lab"
