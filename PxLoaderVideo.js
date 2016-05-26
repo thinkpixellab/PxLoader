@@ -1,4 +1,3 @@
-/* global Video: true */
 // PxLoader plugin to load video elements
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
@@ -21,12 +20,8 @@
         var loader = null;
 
         this.readyEventName = 'canplaythrough';
-
-        try {
-            this.vid = new Video();
-        } catch(e) {
-            this.vid = document.createElement('video');
-        }
+        
+        this.vid = document.createElement('video');
 
         if(origin !== undefined) {
             this.vid.crossOrigin = origin;
