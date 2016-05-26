@@ -29,20 +29,9 @@ module.exports = function(grunt) {
         },
         jshint: {
             files: ['gruntfile.js'].concat(srcFiles),
-            options: {
-                curly: true,
-                eqeqeq: true,
-                immed: true,
-                latedef: false,
-                newcap: true,
-                noarg: true,
-                sub: true,
-                undef: true,
-                boss: true,
-                eqnull: true,
-                browser: true,
-                globals: {}
-            }
+            options : {
+                jshintrc : '.jshintrc'
+            },
         },
         watch: {
             cj: {
