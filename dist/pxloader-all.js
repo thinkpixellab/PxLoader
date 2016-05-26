@@ -42,6 +42,7 @@
 
         var entries = [],
             // holds resources to be loaded with their status
+            completionListeners = [],
             progressListeners = [],
             timeStarted, progressChanged = Date.now();
 
@@ -96,7 +97,7 @@
         };
 
         this.addCompletionListener = function(callback, tags) {
-            progressListeners.push({
+            completionListeners.push({
                 tags: new PxLoaderTags(tags),
                 callback: function(e) {
                     if (e.completedCount === e.totalCount) {
@@ -210,7 +211,7 @@
         var onProgress = function(resource, statusType) {
 
             var entry = null,
-                i, len, numResourceTags, listener, shouldCall;
+                i, len, listeners, listener, shouldCall;
 
             // find the entry for the resource
             for (i = 0, len = entries.length; i < len; i++) {
@@ -227,12 +228,13 @@
             entry.status = statusType;
             progressChanged = Date.now();
 
-            numResourceTags = resource.tags.length;
+            // ensure completion listeners fire after progress listeners
+            listeners = progressListeners.concat( completionListeners );
 
             // fire callbacks for interested listeners
-            for (i = 0, len = progressListeners.length; i < len; i++) {
+            for (i = 0, len = listeners.length; i < len; i++) {
 
-                listener = progressListeners[i];
+                listener = listeners[i];
                 if (listener.tags.length === 0) {
                     // no tags specified so always tell the listener
                     shouldCall = true;
@@ -744,20 +746,12 @@
 
         // cross-browser event binding
         this.bind = function(eventName, eventHandler) {
-            if (self.vid.addEventListener) {
-                self.vid.addEventListener(eventName, eventHandler, false);
-            } else if (self.vid.attachEvent) {
-                self.vid.attachEvent('on' + eventName, eventHandler);
-            }
+            self.vid.addEventListener(eventName, eventHandler, false);
         };
 
         // cross-browser event un-binding
         this.unbind = function(eventName, eventHandler) {
-            if (self.vid.removeEventListener) {
-                self.vid.removeEventListener(eventName, eventHandler, false);
-            } else if (self.vid.detachEvent) {
-                self.vid.detachEvent('on' + eventName, eventHandler);
-            }
+            self.vid.removeEventListener(eventName, eventHandler, false);
         };
 
     }
