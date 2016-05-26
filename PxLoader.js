@@ -1,11 +1,23 @@
-/*global define: true, module: true */ 
-
-(function(global) {
-
-    /*
-     * PixelLab Resource Loader
-     * Loads resources while providing progress updates.
-     */
+/*
+ * PixelLab Resource Loader
+ * Loads resources while providing progress updates.
+ */
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], function () {
+            return (root.PxLoader = factory());
+        });
+    } else if (typeof module === 'object' && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals
+        root.PxLoader = factory();
+    }
+}(this, function () {
     function PxLoader(settings) {
 
         // merge settings with defaults
@@ -195,11 +207,11 @@
         };
 
         var onProgress = function(resource, statusType) {
-            
+
             var entry = null,
                 i, len, numResourceTags, listener, shouldCall;
 
-            // find the entry for the resource    
+            // find the entry for the resource
             for (i = 0, len = entries.length; i < len; i++) {
                 if (entries[i].resource === resource) {
                     entry = entries[i];
@@ -218,7 +230,7 @@
 
             // fire callbacks for interested listeners
             for (i = 0, len = progressListeners.length; i < len; i++) {
-                
+
                 listener = progressListeners[i];
                 if (listener.tags.length === 0) {
                     // no tags specified so always tell the listener
@@ -251,7 +263,7 @@
                 total = 0,
                 i, len, entry, includeResource;
             for (i = 0, len = entries.length; i < len; i++) {
-                
+
                 entry = entries[i];
                 includeResource = false;
 
@@ -334,21 +346,21 @@
 
     // Tag object to handle tag intersection; once created not meant to be changed
     // Performance rationale: http://jsperf.com/lists-indexof-vs-in-operator/3
-     
+
     function PxLoaderTags(values) {
-     
+
         this.all = [];
         this.first = null; // cache the first value
         this.length = 0;
 
         // holds values as keys for quick lookup
         this.lookup = {};
-     
+
         if (values) {
 
             // first fill the array of all values
             if (Array.isArray(values)) {
-                // copy the array of values, just to be safe                
+                // copy the array of values, just to be safe
                 this.all = values.slice(0);
             } else if (typeof values === 'object') {
                 for (var key in values) {
@@ -365,7 +377,7 @@
             if (this.length > 0) {
                 this.first = this.all[0];
             }
-     
+
             // set values as object keys for quick lookup during intersection test
             for (var i = 0; i < this.length; i++) {
                 this.lookup[this.all[i]] = true;
@@ -379,7 +391,7 @@
         // handle empty values case
         if (this.length === 0 || other.length === 0) {
             return false;
-        } 
+        }
 
         // only a single value to compare?
         if (this.length === 1 && other.length === 1) {
@@ -388,9 +400,9 @@
 
         // better to loop through the smaller object
         if (other.length < this.length) {
-            return other.intersects(this); 
+            return other.intersects(this);
         }
-         
+
         // loop through every key to see if there are any matches
         for (var key in this.lookup) {
             if (other.lookup[key]) {
@@ -401,22 +413,8 @@
         return false;
     };
 
-    // AMD module support
-    if (typeof define === 'function' && define.amd) {
-        define('PxLoader', [], function() {
-            return PxLoader;
-        });
-    }
-    
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = PxLoader;
-    }
-    else {
-        // exports
-        global.PxLoader = PxLoader;
-    }
-
-}(this));
+    return PxLoader;
+}));
 
 // Date.now() shim for older browsers
 if (!Date.now) {

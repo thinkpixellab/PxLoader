@@ -1,12 +1,24 @@
-/*! PxLoader | http://thinkpixellab.com/PxLoader */
-/*global define: true, module: true */ 
-
-(function(global) {
-
-    /*
-     * PixelLab Resource Loader
-     * Loads resources while providing progress updates.
-     */
+/*!  | http://thinkpixellab.com/PxLoader */
+/*
+ * PixelLab Resource Loader
+ * Loads resources while providing progress updates.
+ */
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], function () {
+            return (root.PxLoader = factory());
+        });
+    } else if (typeof module === 'object' && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals
+        root.PxLoader = factory();
+    }
+}(this, function () {
     function PxLoader(settings) {
 
         // merge settings with defaults
@@ -196,11 +208,11 @@
         };
 
         var onProgress = function(resource, statusType) {
-            
+
             var entry = null,
                 i, len, numResourceTags, listener, shouldCall;
 
-            // find the entry for the resource    
+            // find the entry for the resource
             for (i = 0, len = entries.length; i < len; i++) {
                 if (entries[i].resource === resource) {
                     entry = entries[i];
@@ -219,7 +231,7 @@
 
             // fire callbacks for interested listeners
             for (i = 0, len = progressListeners.length; i < len; i++) {
-                
+
                 listener = progressListeners[i];
                 if (listener.tags.length === 0) {
                     // no tags specified so always tell the listener
@@ -252,7 +264,7 @@
                 total = 0,
                 i, len, entry, includeResource;
             for (i = 0, len = entries.length; i < len; i++) {
-                
+
                 entry = entries[i];
                 includeResource = false;
 
@@ -335,21 +347,21 @@
 
     // Tag object to handle tag intersection; once created not meant to be changed
     // Performance rationale: http://jsperf.com/lists-indexof-vs-in-operator/3
-     
+
     function PxLoaderTags(values) {
-     
+
         this.all = [];
         this.first = null; // cache the first value
         this.length = 0;
 
         // holds values as keys for quick lookup
         this.lookup = {};
-     
+
         if (values) {
 
             // first fill the array of all values
             if (Array.isArray(values)) {
-                // copy the array of values, just to be safe                
+                // copy the array of values, just to be safe
                 this.all = values.slice(0);
             } else if (typeof values === 'object') {
                 for (var key in values) {
@@ -366,7 +378,7 @@
             if (this.length > 0) {
                 this.first = this.all[0];
             }
-     
+
             // set values as object keys for quick lookup during intersection test
             for (var i = 0; i < this.length; i++) {
                 this.lookup[this.all[i]] = true;
@@ -380,7 +392,7 @@
         // handle empty values case
         if (this.length === 0 || other.length === 0) {
             return false;
-        } 
+        }
 
         // only a single value to compare?
         if (this.length === 1 && other.length === 1) {
@@ -389,9 +401,9 @@
 
         // better to loop through the smaller object
         if (other.length < this.length) {
-            return other.intersects(this); 
+            return other.intersects(this);
         }
-         
+
         // loop through every key to see if there are any matches
         for (var key in this.lookup) {
             if (other.lookup[key]) {
@@ -402,22 +414,8 @@
         return false;
     };
 
-    // AMD module support
-    if (typeof define === 'function' && define.amd) {
-        define('PxLoader', [], function() {
-            return PxLoader;
-        });
-    }
-    
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = PxLoader;
-    }
-    else {
-        // exports
-        global.PxLoader = PxLoader;
-    }
-
-}(this));
+    return PxLoader;
+}));
 
 // Date.now() shim for older browsers
 if (!Date.now) {
@@ -437,421 +435,466 @@ if (!Array.isArray) {
 
 
 
-/*global PxLoader: true, define: true */
-
 // PxLoader plugin to load images
-function PxLoaderImage(url, tags, priority, origin) {
-    var self = this,
-        loader = null;
-
-    this.img = new Image();
-    if(origin !== undefined) {
-        this.img.crossOrigin = origin;
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['pxloader'], function (PxLoader) {
+            return (root.PxLoaderImage = factory(PxLoader));
+        });
+    } else if (typeof module === 'object' && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(require('pxloader'));
+    } else {
+        // Browser globals
+        root.PxLoaderImage = factory(root.PxLoader);
     }
-    this.tags = tags;
-    this.priority = priority;
+}(this, function (PxLoader) {
+    function PxLoaderImage(url, tags, priority, origin) {
+        var self = this,
+            loader = null;
 
-    var onReadyStateChange = function() {
-        if (self.img.readyState === 'complete') {
-            removeEventHandlers();
-            loader.onLoad(self);
+        this.img = new Image();
+        if(origin !== undefined) {
+            this.img.crossOrigin = origin;
         }
-    };
+        this.tags = tags;
+        this.priority = priority;
 
-    var onLoad = function() {
-        removeEventHandlers();
-        loader.onLoad(self);
-    };
-
-    var onError = function() {
-        removeEventHandlers();
-        loader.onError(self);
-    };
-
-    var removeEventHandlers = function() {
-        self.unbind('load', onLoad);
-        self.unbind('readystatechange', onReadyStateChange);
-        self.unbind('error', onError);
-    };
-
-    this.start = function(pxLoader) {
-        // we need the loader ref so we can notify upon completion
-        loader = pxLoader;
-
-        // NOTE: Must add event listeners before the src is set. We
-        // also need to use the readystatechange because sometimes
-        // load doesn't fire when an image is in the cache.
-        self.bind('load', onLoad);
-        self.bind('readystatechange', onReadyStateChange);
-        self.bind('error', onError);
-
-        self.img.src = url;
-    };
-
-    // called by PxLoader to check status of image (fallback in case
-    // the event listeners are not triggered).
-    this.checkStatus = function() {
-        if (self.img.complete) {
-            removeEventHandlers();
-            loader.onLoad(self);
-        }
-    };
-
-    // called by PxLoader when it is no longer waiting
-    this.onTimeout = function() {
-        removeEventHandlers();
-        if (self.img.complete) {
-            loader.onLoad(self);
-        } else {
-            loader.onTimeout(self);
-        }
-    };
-
-    // returns a name for the resource that can be used in logging
-    this.getName = function() {
-        return url;
-    };
-
-    // cross-browser event binding
-    this.bind = function(eventName, eventHandler) {
-        if (self.img.addEventListener) {
-            self.img.addEventListener(eventName, eventHandler, false);
-        } else if (self.img.attachEvent) {
-            self.img.attachEvent('on' + eventName, eventHandler);
-        }
-    };
-
-    // cross-browser event un-binding
-    this.unbind = function(eventName, eventHandler) {
-        if (self.img.removeEventListener) {
-            self.img.removeEventListener(eventName, eventHandler, false);
-        } else if (self.img.detachEvent) {
-            self.img.detachEvent('on' + eventName, eventHandler);
-        }
-    };
-
-}
-
-// add a convenience method to PxLoader for adding an image
-PxLoader.prototype.addImage = function(url, tags, priority, origin) {
-    var imageLoader = new PxLoaderImage(url, tags, priority, origin);
-    this.add(imageLoader);
-
-    // return the img element to the caller
-    return imageLoader.img;
-};
-
-// AMD module support
-if (typeof define === 'function' && define.amd) {
-    define('PxLoaderImage', [], function() {
-        return PxLoaderImage;
-    });
-}
-/*global PxLoader: true, define: true, soundManager: true */ 
-
-// PxLoader plugin to load sound using SoundManager2
-function PxLoaderSound(id, url, tags, priority) {
-    var self = this,
-        loader = null;
-
-    // For iOS and Android, soundManager2 uses a global audio object so we 
-    // can't preload multiple sounds. We'll have to hope they load quickly
-    // when we need to play them. Unfortunately, SM2 doesn't expose
-    // a property to indicate its using a global object. For now we'll
-    // use the same tests they use.
-    var isIOS = navigator.userAgent.match(/(ipad|iphone|ipod)/i),
-        isAndroid = navigator.userAgent.match(/android/i);
-    this.useGlobalHTML5Audio = isIOS || isAndroid;
-
-    this.tags = tags;
-    this.priority = priority;
-    this.sound = soundManager['createSound']({
-        'id': id,
-        'url': url,
-        'autoLoad': false,
-        'onload': function() {
-            loader.onLoad(self);
-        },
-
-        // HTML5-only event: Fires when a browser has chosen to stop downloading.
-        // "The user agent is intentionally not currently fetching media data,
-        // but does not have the entire media resource downloaded."
-        'onsuspend': function() {
-            loader.onTimeout(self);
-        },
-
-        // Fires at a regular interval when a sound is loading and new data
-        // has been received.
-        'whileloading': function() {
-            var bytesLoaded = this['bytesLoaded'],
-                bytesTotal = this['bytesTotal'];
-
-            // TODO: provide percentage complete updates to loader?
-            // see if we have loaded the file
-            if (bytesLoaded > 0 && (bytesLoaded === bytesTotal)) {
+        var onReadyStateChange = function() {
+            if (self.img.readyState === 'complete') {
+                removeEventHandlers();
                 loader.onLoad(self);
             }
-        }
-    });
+        };
 
-    this.start = function(pxLoader) {
-        // we need the loader ref so we can notify upon completion
-        loader = pxLoader;
-
-        // can't preload when a single global audio element is used
-        if (this.useGlobalHTML5Audio) {
-            loader.onTimeout(self);
-        } else {
-            this.sound['load']();
-        }
-    };
-
-    this.checkStatus = function() {
-        switch(self.sound['readyState']) {
-            case 0:
-                // uninitialised
-                break;
-            case 1:
-                // loading
-                break;
-            case 2:
-                // failed/error
-                loader.onError(self);
-                break;
-            case 3:
-                // loaded/success
-                loader.onLoad(self);
-                break;
-        }
-    };
-
-    this.onTimeout = function() {
-        loader.onTimeout(self);
-    };
-
-    this.getName = function() {
-        return url;
-    };
-}
-
-// add a convenience method to PxLoader for adding a sound
-PxLoader.prototype.addSound = function(id, url, tags, priority) {
-    var soundLoader = new PxLoaderSound(id, url, tags, priority);
-    this.add(soundLoader);
-    return soundLoader.sound;
-};
-
-// AMD module support
-if (typeof define === 'function' && define.amd) {
-    define('PxLoaderSound', [], function() {
-        return PxLoaderSound;
-    });
-}
-/*global PxLoader: true, define: true, Video: true */
-
-// PxLoader plugin to load video elements
-function PxLoaderVideo(url, tags, priority, origin) {
-    var self = this;
-    var loader = null;
-
-    this.readyEventName = 'canplaythrough';
-
-    try {
-        this.vid = new Video();
-    } catch(e) {
-        this.vid = document.createElement('video');
-    }
-
-    if(origin !== undefined) {
-        this.vid.crossOrigin = origin;
-    }
-    this.tags = tags;
-    this.priority = priority;
-
-    var onReadyStateChange = function() {
-        if (self.vid.readyState !== 4) {
-            return;
-        }
-
-        removeEventHandlers();
-        loader.onLoad(self);
-    };
-
-    var onLoad = function() {
-        removeEventHandlers();
-        loader.onLoad(self);
-    };
-
-    var onError = function() {
-        removeEventHandlers();
-        loader.onError(self);
-    };
-
-    var removeEventHandlers = function() {
-        self.unbind('load', onLoad);
-        self.unbind(self.readyEventName, onReadyStateChange);
-        self.unbind('error', onError);
-    };
-
-    this.start = function(pxLoader) {
-        // we need the loader ref so we can notify upon completion
-        loader = pxLoader;
-
-        // NOTE: Must add event listeners before the src is set. We
-        // also need to use the readystatechange because sometimes
-        // load doesn't fire when an video is in the cache.
-        self.bind('load', onLoad);
-        self.bind(self.readyEventName, onReadyStateChange);
-        self.bind('error', onError);
-
-        // sometimes the browser will intentionally stop downloading
-        // the video. In that case we'll consider the video loaded
-        self.bind('suspend', onLoad);
-
-        self.vid.src = url;
-        self.vid.load();
-    };
-
-    // called by PxLoader to check status of video (fallback in case
-    // the event listeners are not triggered).
-    this.checkStatus = function() {
-        if (self.vid.readyState !== 4) {
-            return;
-        }
-
-        removeEventHandlers();
-        loader.onLoad(self);
-    };
-
-    // called by PxLoader when it is no longer waiting
-    this.onTimeout = function() {
-        removeEventHandlers();
-        if (self.vid.readyState !== 4) {
+        var onLoad = function() {
+            removeEventHandlers();
             loader.onLoad(self);
-        } else {
-            loader.onTimeout(self);
-        }
-    };
+        };
 
-    // returns a name for the resource that can be used in logging
-    this.getName = function() {
-        return url;
-    };
+        var onError = function() {
+            removeEventHandlers();
+            loader.onError(self);
+        };
 
-    // cross-browser event binding
-    this.bind = function(eventName, eventHandler) {
-        if (self.vid.addEventListener) {
-            self.vid.addEventListener(eventName, eventHandler, false);
-        } else if (self.vid.attachEvent) {
-            self.vid.attachEvent('on' + eventName, eventHandler);
-        }
-    };
+        var removeEventHandlers = function() {
+            self.unbind('load', onLoad);
+            self.unbind('readystatechange', onReadyStateChange);
+            self.unbind('error', onError);
+        };
 
-    // cross-browser event un-binding
-    this.unbind = function(eventName, eventHandler) {
-        if (self.vid.removeEventListener) {
-            self.vid.removeEventListener(eventName, eventHandler, false);
-        } else if (self.vid.detachEvent) {
-            self.vid.detachEvent('on' + eventName, eventHandler);
-        }
-    };
+        this.start = function(pxLoader) {
+            // we need the loader ref so we can notify upon completion
+            loader = pxLoader;
 
-}
+            // NOTE: Must add event listeners before the src is set. We
+            // also need to use the readystatechange because sometimes
+            // load doesn't fire when an image is in the cache.
+            self.bind('load', onLoad);
+            self.bind('readystatechange', onReadyStateChange);
+            self.bind('error', onError);
 
-// add a convenience method to PxLoader for adding an image
-PxLoader.prototype.addVideo = function(url, tags, priority, origin) {
-    var videoLoader = new PxLoaderVideo(url, tags, priority, origin);
-    this.add(videoLoader);
+            self.img.src = url;
+        };
 
-    // return the vid element to the caller
-    return videoLoader.vid;
-};
+        // called by PxLoader to check status of image (fallback in case
+        // the event listeners are not triggered).
+        this.checkStatus = function() {
+            if (self.img.complete) {
+                removeEventHandlers();
+                loader.onLoad(self);
+            }
+        };
 
-// AMD module support
-if (typeof define === 'function' && define.amd) {
-    define('PxLoaderVideo', [], function() {
-        return PxLoaderVideo;
-    });
-}
+        // called by PxLoader when it is no longer waiting
+        this.onTimeout = function() {
+            removeEventHandlers();
+            if (self.img.complete) {
+                loader.onLoad(self);
+            } else {
+                loader.onTimeout(self);
+            }
+        };
 
-/*global PxLoader: true, define: true */
+        // returns a name for the resource that can be used in logging
+        this.getName = function() {
+            return url;
+        };
 
-var PxLoaderData = function(url, tags, priority) {
-  var self = this;
-  var loader = null;
+        // cross-browser event binding
+        this.bind = function(eventName, eventHandler) {
+            if (self.img.addEventListener) {
+                self.img.addEventListener(eventName, eventHandler, false);
+            } else if (self.img.attachEvent) {
+                self.img.attachEvent('on' + eventName, eventHandler);
+            }
+        };
 
-  // used by the loader to categorize and prioritize 
-  this.tags = tags;
-  this.priority = priority;
+        // cross-browser event un-binding
+        this.unbind = function(eventName, eventHandler) {
+            if (self.img.removeEventListener) {
+                self.img.removeEventListener(eventName, eventHandler, false);
+            } else if (self.img.detachEvent) {
+                self.img.detachEvent('on' + eventName, eventHandler);
+            }
+        };
 
-  this.request = new XMLHttpRequest();
-
-  // called by PxLoader to trigger download 
-  this.start = function(pxLoader) {
-    // we need the loader ref so we can notify upon completion 
-    loader = pxLoader;
-
-    // set up event handlers so we send the loader progress updates 
-
-    // there are 3 possible events we can tell the loader about: 
-    // loader.onLoad(self);    // the resource loaded 
-    // loader.onError(self);   // an error occured 
-    // loader.onTimeout(self); // timeout while waiting 
-    
-    self.request.onload = this.onLoad;
-    self.request.onerror = this.onError;
-
-    self.request.open('GET', url, true);
-    self.request.send(null);
-  };
-
-  // called by PxLoader to check status of image (fallback in case 
-  // the event listeners are not triggered). 
-  this.checkStatus = function() {
-    if (self.request.status === 200) {
-      loader.onLoad(self);
     }
-  // report any status changes to the loader 
-  // no need to do anything if nothing has changed 
-  };
 
-  // called by PxLoader when it is no longer waiting 
-  this.onTimeout = function() {
-    // must report a status to the loader: load, error, or timeout 
-    if (self.request.status === 200) {
-      loader.onLoad(self);
+    // add a convenience method to PxLoader for adding an image
+    PxLoader.prototype.addImage = function(url, tags, priority, origin) {
+        var imageLoader = new PxLoaderImage(url, tags, priority, origin);
+        this.add(imageLoader);
+
+        // return the img element to the caller
+        return imageLoader.img;
+    };
+
+    return PxLoaderImage;
+}));
+
+/* global soundManager: true */
+// PxLoader plugin to load sound using SoundManager2
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['pxloader'], function (PxLoader) {
+            return (root.PxLoaderSound = factory(PxLoader));
+        });
+    } else if (typeof module === 'object' && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(require('pxloader'));
     } else {
-      loader.onTimeout(self);
+        // Browser globals
+        root.PxLoaderSound = factory(root.PxLoader);
     }
-  };
+}(this, function (PxLoader) {
+    function PxLoaderSound(id, url, tags, priority) {
+        var self = this,
+            loader = null;
+    
+        // For iOS and Android, soundManager2 uses a global audio object so we 
+        // can't preload multiple sounds. We'll have to hope they load quickly
+        // when we need to play them. Unfortunately, SM2 doesn't expose
+        // a property to indicate its using a global object. For now we'll
+        // use the same tests they use.
+        var isIOS = navigator.userAgent.match(/(ipad|iphone|ipod)/i),
+            isAndroid = navigator.userAgent.match(/android/i);
+        this.useGlobalHTML5Audio = isIOS || isAndroid;
+    
+        this.tags = tags;
+        this.priority = priority;
+        this.sound = soundManager['createSound']({
+            'id': id,
+            'url': url,
+            'autoLoad': false,
+            'onload': function() {
+                loader.onLoad(self);
+            },
+    
+            // HTML5-only event: Fires when a browser has chosen to stop downloading.
+            // "The user agent is intentionally not currently fetching media data,
+            // but does not have the entire media resource downloaded."
+            'onsuspend': function() {
+                loader.onTimeout(self);
+            },
+    
+            // Fires at a regular interval when a sound is loading and new data
+            // has been received.
+            'whileloading': function() {
+                var bytesLoaded = this['bytesLoaded'],
+                    bytesTotal = this['bytesTotal'];
+    
+                // TODO: provide percentage complete updates to loader?
+                // see if we have loaded the file
+                if (bytesLoaded > 0 && (bytesLoaded === bytesTotal)) {
+                    loader.onLoad(self);
+                }
+            }
+        });
+    
+        this.start = function(pxLoader) {
+            // we need the loader ref so we can notify upon completion
+            loader = pxLoader;
+    
+            // can't preload when a single global audio element is used
+            if (this.useGlobalHTML5Audio) {
+                loader.onTimeout(self);
+            } else {
+                this.sound['load']();
+            }
+        };
+    
+        this.checkStatus = function() {
+            switch(self.sound['readyState']) {
+                case 0:
+                    // uninitialised
+                    break;
+                case 1:
+                    // loading
+                    break;
+                case 2:
+                    // failed/error
+                    loader.onError(self);
+                    break;
+                case 3:
+                    // loaded/success
+                    loader.onLoad(self);
+                    break;
+            }
+        };
+    
+        this.onTimeout = function() {
+            loader.onTimeout(self);
+        };
+    
+        this.getName = function() {
+            return url;
+        };
+    }
+    
+    // add a convenience method to PxLoader for adding a sound
+    PxLoader.prototype.addSound = function(id, url, tags, priority) {
+        var soundLoader = new PxLoaderSound(id, url, tags, priority);
+        this.add(soundLoader);
+        return soundLoader.sound;
+    };
 
-  this.onLoad = function(){
-    loader.onLoad(self);
-  };
+    return PxLoaderSound;
+}));
 
-  this.onError = function(){
-    loader.onError(self);
-  };
+/* global Video: true */
+// PxLoader plugin to load video elements
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['pxloader'], function (PxLoader) {
+            return (root.PxLoaderVideo = factory(PxLoader));
+        });
+    } else if (typeof module === 'object' && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(require('pxloader'));
+    } else {
+        // Browser globals
+        root.PxLoaderVideo = factory(root.PxLoader);
+    }
+}(this, function (PxLoader) {
+    function PxLoaderVideo(url, tags, priority, origin) {
+        var self = this;
+        var loader = null;
 
-  // returns a name for the resource that can be used in logging 
-  this.getName = function() {
-    return url;
-  };
-};
+        this.readyEventName = 'canplaythrough';
 
-// add a convenience method to PxLoader for adding a data
-PxLoader.prototype.addData = function(url, tags, priority) {
-  var dataLoader = new PxLoaderData(url, tags, priority);
+        try {
+            this.vid = new Video();
+        } catch(e) {
+            this.vid = document.createElement('video');
+        }
 
-  this.add(dataLoader);
+        if(origin !== undefined) {
+            this.vid.crossOrigin = origin;
+        }
+        this.tags = tags;
+        this.priority = priority;
 
-  // return the request object to the caller
-  return dataLoader.request;
-};
+        var onReadyStateChange = function() {
+            if (self.vid.readyState !== 4) {
+                return;
+            }
 
-// AMD module support
-if (typeof define === 'function' && define.amd) {
-  define('PxLoaderData', [], function() {
+            removeEventHandlers();
+            loader.onLoad(self);
+        };
+
+        var onLoad = function() {
+            removeEventHandlers();
+            loader.onLoad(self);
+        };
+
+        var onError = function() {
+            removeEventHandlers();
+            loader.onError(self);
+        };
+
+        var removeEventHandlers = function() {
+            self.unbind('load', onLoad);
+            self.unbind(self.readyEventName, onReadyStateChange);
+            self.unbind('error', onError);
+        };
+
+        this.start = function(pxLoader) {
+            // we need the loader ref so we can notify upon completion
+            loader = pxLoader;
+
+            // NOTE: Must add event listeners before the src is set. We
+            // also need to use the readystatechange because sometimes
+            // load doesn't fire when an video is in the cache.
+            self.bind('load', onLoad);
+            self.bind(self.readyEventName, onReadyStateChange);
+            self.bind('error', onError);
+
+            // sometimes the browser will intentionally stop downloading
+            // the video. In that case we'll consider the video loaded
+            self.bind('suspend', onLoad);
+
+            self.vid.src = url;
+            self.vid.load();
+        };
+
+        // called by PxLoader to check status of video (fallback in case
+        // the event listeners are not triggered).
+        this.checkStatus = function() {
+            if (self.vid.readyState !== 4) {
+                return;
+            }
+
+            removeEventHandlers();
+            loader.onLoad(self);
+        };
+
+        // called by PxLoader when it is no longer waiting
+        this.onTimeout = function() {
+            removeEventHandlers();
+            if (self.vid.readyState !== 4) {
+                loader.onLoad(self);
+            } else {
+                loader.onTimeout(self);
+            }
+        };
+
+        // returns a name for the resource that can be used in logging
+        this.getName = function() {
+            return url;
+        };
+
+        // cross-browser event binding
+        this.bind = function(eventName, eventHandler) {
+            if (self.vid.addEventListener) {
+                self.vid.addEventListener(eventName, eventHandler, false);
+            } else if (self.vid.attachEvent) {
+                self.vid.attachEvent('on' + eventName, eventHandler);
+            }
+        };
+
+        // cross-browser event un-binding
+        this.unbind = function(eventName, eventHandler) {
+            if (self.vid.removeEventListener) {
+                self.vid.removeEventListener(eventName, eventHandler, false);
+            } else if (self.vid.detachEvent) {
+                self.vid.detachEvent('on' + eventName, eventHandler);
+            }
+        };
+
+    }
+
+    // add a convenience method to PxLoader for adding an image
+    PxLoader.prototype.addVideo = function(url, tags, priority, origin) {
+        var videoLoader = new PxLoaderVideo(url, tags, priority, origin);
+        this.add(videoLoader);
+
+        // return the vid element to the caller
+        return videoLoader.vid;
+    };
+
+    return PxLoaderVideo;
+}));
+
+// PxLoader plugin to load data
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['pxloader'], function (PxLoader) {
+            return (root.PxLoaderData = factory(PxLoader));
+        });
+    } else if (typeof module === 'object' && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(require('pxloader'));
+    } else {
+        // Browser globals
+        root.PxLoaderData = factory(root.PxLoader);
+    }
+}(this, function (PxLoader) {
+    var PxLoaderData = function(url, tags, priority) {
+      var self = this;
+      var loader = null;
+
+      // used by the loader to categorize and prioritize
+      this.tags = tags;
+      this.priority = priority;
+
+      this.request = new XMLHttpRequest();
+
+      // called by PxLoader to trigger download
+      this.start = function(pxLoader) {
+        // we need the loader ref so we can notify upon completion
+        loader = pxLoader;
+
+        // set up event handlers so we send the loader progress updates
+
+        // there are 3 possible events we can tell the loader about:
+        // loader.onLoad(self);    // the resource loaded
+        // loader.onError(self);   // an error occured
+        // loader.onTimeout(self); // timeout while waiting
+
+        self.request.onload = this.onLoad;
+        self.request.onerror = this.onError;
+
+        self.request.open('GET', url, true);
+        self.request.send(null);
+      };
+
+      // called by PxLoader to check status of image (fallback in case
+      // the event listeners are not triggered).
+      this.checkStatus = function() {
+        if (self.request.status === 200) {
+          loader.onLoad(self);
+        }
+      // report any status changes to the loader
+      // no need to do anything if nothing has changed
+      };
+
+      // called by PxLoader when it is no longer waiting
+      this.onTimeout = function() {
+        // must report a status to the loader: load, error, or timeout
+        if (self.request.status === 200) {
+          loader.onLoad(self);
+        } else {
+          loader.onTimeout(self);
+        }
+      };
+
+      this.onLoad = function(){
+        loader.onLoad(self);
+      };
+
+      this.onError = function(){
+        loader.onError(self);
+      };
+
+      // returns a name for the resource that can be used in logging
+      this.getName = function() {
+        return url;
+      };
+    };
+
+    // add a convenience method to PxLoader for adding a data
+    PxLoader.prototype.addData = function(url, tags, priority) {
+      var dataLoader = new PxLoaderData(url, tags, priority);
+
+      this.add(dataLoader);
+
+      // return the request object to the caller
+      return dataLoader.request;
+    };
+
     return PxLoaderData;
-  });
-}
+}));
