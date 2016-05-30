@@ -1,7 +1,7 @@
 {
   "name": "pxloader",
   "main": "PxLoader.js",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "homepage": "http://thinkpixellab.com/pxloader/",
   "authors": [
     "Pixel Lab"
