@@ -1,9 +1,9 @@
-// PxLoader plugin to load video elements
+// PxLoader plugin to load audio elements
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define(['pxloader'], function (PxLoader) {
-            return (root.PxLoaderVideo = factory(PxLoader));
+            return (root.PxLoaderAudio = factory(PxLoader));
         });
     } else if (typeof module === 'object' && module.exports) {
         // Node. Does not work with strict CommonJS, but
@@ -12,25 +12,25 @@
         module.exports = factory(require('pxloader'));
     } else {
         // Browser globals
-        root.PxLoaderVideo = factory(root.PxLoader);
+        root.PxLoaderAudio = factory(root.PxLoader);
     }
 }(this, function (PxLoader) {
-    function PxLoaderVideo(url, tags, priority, origin) {
+    function PxLoaderAudio(url, tags, priority, origin) {
         var self = this;
         var loader = null;
 
         this.readyEventName = 'canplaythrough';
         
-        this.video = document.createElement('video');
+        this.audio = document.createElement('audio');
 
         if(origin !== undefined) {
-            this.video.crossOrigin = origin;
+            this.audio.crossOrigin = origin;
         }
         this.tags = tags;
         this.priority = priority;
 
         var onReadyStateChange = function() {
-            if (self.video.readyState !== 4) {
+            if (self.audio.readyState !== 4) {
                 return;
             }
 
@@ -60,23 +60,23 @@
 
             // NOTE: Must add event listeners before the src is set. We
             // also need to use the readystatechange because sometimes
-            // load doesn't fire when an video is in the cache.
+            // load doesn't fire when an audio is in the cache.
             self.bind('load', onLoad);
             self.bind(self.readyEventName, onReadyStateChange);
             self.bind('error', onError);
 
             // sometimes the browser will intentionally stop downloading
-            // the video. In that case we'll consider the video loaded
+            // the audio. In that case we'll consider the audio loaded
             self.bind('suspend', onLoad);
 
-            self.video.src = url;
-            self.video.load();
+            self.audio.src = url;
+            self.audio.load();
         };
 
-        // called by PxLoader to check status of video (fallback in case
+        // called by PxLoader to check status of audio (fallback in case
         // the event listeners are not triggered).
         this.checkStatus = function() {
-            if (self.video.readyState !== 4) {
+            if (self.audio.readyState !== 4) {
                 return;
             }
 
@@ -87,7 +87,7 @@
         // called by PxLoader when it is no longer waiting
         this.onTimeout = function() {
             removeEventHandlers();
-            if (self.video.readyState !== 4) {
+            if (self.audio.readyState !== 4) {
                 loader.onLoad(self);
             } else {
                 loader.onTimeout(self);
@@ -101,24 +101,24 @@
 
         // cross-browser event binding
         this.bind = function(eventName, eventHandler) {
-            self.video.addEventListener(eventName, eventHandler, false);
+            self.audio.addEventListener(eventName, eventHandler, false);
         };
 
         // cross-browser event un-binding
         this.unbind = function(eventName, eventHandler) {
-            self.video.removeEventListener(eventName, eventHandler, false);
+            self.audio.removeEventListener(eventName, eventHandler, false);
         };
 
     }
 
-    // add a convenience method to PxLoader for adding a video
-    PxLoader.prototype.addVideo = function(url, tags, priority, origin) {
-        var videoLoader = new PxLoaderVideo(url, tags, priority, origin);
-        this.add(videoLoader);
+    // add a convenience method to PxLoader for adding audio
+    PxLoader.prototype.addAudio = function(url, tags, priority, origin) {
+        var audioLoader = new PxLoaderAudio(url, tags, priority, origin);
+        this.add(audioLoader);
 
-        // return the video element to the caller
-        return videoLoader.video;
+        // return the audio element to the caller
+        return audioLoader.audio;
     };
 
-    return PxLoaderVideo;
+    return PxLoaderAudio;
 }));
