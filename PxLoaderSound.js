@@ -1,9 +1,9 @@
 /* global soundManager: true */
 // PxLoader plugin to load sound using SoundManager2
-(function (root, factory) {
+(function(root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['pxloader'], function (PxLoader) {
+        define(['pxloader'], function(PxLoader) {
             return (root.PxLoaderSound = factory(PxLoader));
         });
     } else if (typeof module === 'object' && module.exports) {
@@ -15,8 +15,8 @@
         // Browser globals
         root.PxLoaderSound = factory(root.PxLoader);
     }
-}(this, function (PxLoader) {
-    function PxLoaderSound(id, url, tags, priority) {
+}(this, function(PxLoader) {
+    function PxLoaderSound(id, url, tags, priority, options) {
         var self = this,
             loader = null;
     
@@ -101,8 +101,8 @@
     }
     
     // add a convenience method to PxLoader for adding a sound
-    PxLoader.prototype.addSound = function(id, url, tags, priority) {
-        var soundLoader = new PxLoaderSound(id, url, tags, priority);
+    PxLoader.prototype.addSound = function(id, url, tags, priority, options) {
+        var soundLoader = new PxLoaderSound(id, url, tags, priority, options);
         this.add(soundLoader);
         return soundLoader.sound;
     };

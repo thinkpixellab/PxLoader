@@ -1,8 +1,8 @@
 // PxLoader plugin to load video elements
-(function (root, factory) {
+(function(root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['pxloader'], function (PxLoader) {
+        define(['pxloader'], function(PxLoader) {
             return (root.PxLoaderVideo = factory(PxLoader));
         });
     } else if (typeof module === 'object' && module.exports) {
@@ -14,18 +14,21 @@
         // Browser globals
         root.PxLoaderVideo = factory(root.PxLoader);
     }
-}(this, function (PxLoader) {
-    function PxLoaderVideo(url, tags, priority, origin) {
-        var self = this;
-        var loader = null;
+}(this, function(PxLoader) {
+    function PxLoaderVideo(url, tags, priority, options) {
+        var self = this,
+            loader = null,
+            video;
 
         this.readyEventName = 'canplaythrough';
         
-        this.video = document.createElement('video');
+        video = this.video = document.createElement('video');
 
-        if(origin !== undefined) {
-            this.video.crossOrigin = origin;
+        if (options.origin) {
+            video.crossOrigin = options.origin;
         }
+        video.preload = 'auto';
+        
         this.tags = tags;
         this.priority = priority;
 
@@ -33,25 +36,31 @@
             if (self.video.readyState !== 4) {
                 return;
             }
-
-            removeEventHandlers();
-            loader.onLoad(self);
+            
+            onLoad();
         };
 
         var onLoad = function() {
-            removeEventHandlers();
             loader.onLoad(self);
+            cleanup();
         };
 
         var onError = function() {
-            removeEventHandlers();
             loader.onError(self);
+            cleanup();
+        };
+        
+        var onTimeout = function() {
+            loader.onTimeout(self);
+            cleanup();
         };
 
-        var removeEventHandlers = function() {
+        var cleanup = function() {
             self.unbind('load', onLoad);
             self.unbind(self.readyEventName, onReadyStateChange);
             self.unbind('error', onError);
+            // Force browser to release connection
+            self.video.src = '';
         };
 
         this.start = function(pxLoader) {
@@ -76,21 +85,15 @@
         // called by PxLoader to check status of video (fallback in case
         // the event listeners are not triggered).
         this.checkStatus = function() {
-            if (self.video.readyState !== 4) {
-                return;
-            }
-
-            removeEventHandlers();
-            loader.onLoad(self);
+            onReadyStateChange();
         };
 
         // called by PxLoader when it is no longer waiting
         this.onTimeout = function() {
-            removeEventHandlers();
             if (self.video.readyState !== 4) {
-                loader.onLoad(self);
+                onLoad();
             } else {
-                loader.onTimeout(self);
+                onTimeout();
             }
         };
 
@@ -112,8 +115,8 @@
     }
 
     // add a convenience method to PxLoader for adding a video
-    PxLoader.prototype.addVideo = function(url, tags, priority, origin) {
-        var videoLoader = new PxLoaderVideo(url, tags, priority, origin);
+    PxLoader.prototype.addVideo = function(url, tags, priority, options) {
+        var videoLoader = new PxLoaderVideo(url, tags, priority, options);
         this.add(videoLoader);
 
         // return the video element to the caller
