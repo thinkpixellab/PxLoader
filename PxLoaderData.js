@@ -1,8 +1,8 @@
 // PxLoader plugin to load data
-(function (root, factory) {
+(function(root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['pxloader'], function (PxLoader) {
+        define(['pxloader'], function(PxLoader) {
             return (root.PxLoaderData = factory(PxLoader));
         });
     } else if (typeof module === 'object' && module.exports) {
@@ -14,78 +14,109 @@
         // Browser globals
         root.PxLoaderData = factory(root.PxLoader);
     }
-}(this, function (PxLoader) {
-    var PxLoaderData = function(url, tags, priority) {
-      var self = this;
-      var loader = null;
+}(this, function(PxLoader) {
+    function PxLoaderData(url, tags, priority, options) {
+        options = options || {};
 
-      // used by the loader to categorize and prioritize
-      this.tags = tags;
-      this.priority = priority;
+        var self = this,
+            loader = null;
 
-      this.request = new XMLHttpRequest();
+        // used by the loader to categorize and prioritize
+        this.tags = tags;
+        this.priority = priority;
 
-      // called by PxLoader to trigger download
-      this.start = function(pxLoader) {
-        // we need the loader ref so we can notify upon completion
-        loader = pxLoader;
+        this.xhr = new XMLHttpRequest();
 
-        // set up event handlers so we send the loader progress updates
+        var onReadyStateChange = function() {
+            if (self.xhr.readyState !== 4) {
+                return;
+            }
 
-        // there are 3 possible events we can tell the loader about:
-        // loader.onLoad(self);    // the resource loaded
-        // loader.onError(self);   // an error occured
-        // loader.onTimeout(self); // timeout while waiting
+            if (self.xhr.status === 200 ) {
+                onLoad();
+            } else {
+                onError();
+            }
+        };
+        
+        var onLoad = function() {
+            loader.onLoad(self);
+            cleanup();
+        };
 
-        self.request.onload = this.onLoad;
-        self.request.onerror = this.onError;
+        var onError = function() {
+            loader.onError(self);
+            cleanup();
+        };
+        
+        var onTimeout = function() {
+            loader.onTimeout(self);
+            cleanup();
+        };
 
-        self.request.open('GET', url, true);
-        self.request.send(null);
-      };
+        var cleanup = function() {
+            self.unbind('readystatechange', onReadyStateChange);
+            self.unbind('error', onError);
+        };
 
-      // called by PxLoader to check status of image (fallback in case
-      // the event listeners are not triggered).
-      this.checkStatus = function() {
-        if (self.request.status === 200) {
-          loader.onLoad(self);
-        }
-      // report any status changes to the loader
-      // no need to do anything if nothing has changed
-      };
+        // called by PxLoader to trigger download
+        this.start = function( pxLoader ) {
+            // we need the loader ref so we can notify upon completion
+            loader = pxLoader;
 
-      // called by PxLoader when it is no longer waiting
-      this.onTimeout = function() {
-        // must report a status to the loader: load, error, or timeout
-        if (self.request.status === 200) {
-          loader.onLoad(self);
-        } else {
-          loader.onTimeout(self);
-        }
-      };
+            // set up event handlers so we send the loader progress updates
+            self.bind('readystatechange', onReadyStateChange);
+            self.bind('error', onError);
 
-      this.onLoad = function(){
-        loader.onLoad(self);
-      };
+            self.xhr.open('GET', url, true);
+            self.xhr.send(null);
+            self.xhr.responseType = (options.responseType) ? options.responseType : '';
+        };
 
-      this.onError = function(){
-        loader.onError(self);
-      };
+        // called by PxLoader to check status of request (fallback in case
+        // the event listeners are not triggered).
+        this.checkStatus = function() {
+            onReadyStateChange();
+        };
 
-      // returns a name for the resource that can be used in logging
-      this.getName = function() {
-        return url;
-      };
-    };
+        // called by PxLoader when it is no longer waiting
+        this.onTimeout = function() {
+            // must report a status to the loader: load, error, or timeout
+            if (self.xhr.readyState === 4) {
+                if (self.xhr.status === 200) {
+                    onLoad();
+                } else {
+                    onError();
+                }
+            } else {
+                onTimeout();
+            }
+        };
+
+        // returns a name for the resource that can be used in logging
+        this.getName = function() {
+            return url;
+        };
+
+        // cross-browser event binding
+        this.bind = function(eventName, eventHandler) {
+            self.xhr.addEventListener(eventName, eventHandler, false);
+        };
+
+        // cross-browser event un-binding
+        this.unbind = function(eventName, eventHandler) {
+            self.xhr.removeEventListener(eventName, eventHandler, false);
+        };
+    }
 
     // add a convenience method to PxLoader for adding a data
-    PxLoader.prototype.addData = function(url, tags, priority) {
-      var dataLoader = new PxLoaderData(url, tags, priority);
+    PxLoader.prototype.addData = function(url, tags, priority, options) {
+        var dataLoader = new PxLoaderData(url, tags, priority, options);
 
-      this.add(dataLoader);
+        this.add(dataLoader);
 
-      // return the request object to the caller
-      return dataLoader.request;
+        // return the request object to the caller
+        return dataLoader.xhr;
     };
 
     return PxLoaderData;

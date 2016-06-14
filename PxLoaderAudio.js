@@ -1,8 +1,8 @@
 // PxLoader plugin to load audio elements
-(function (root, factory) {
+(function(root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['pxloader'], function (PxLoader) {
+        define(['pxloader'], function(PxLoader) {
             return (root.PxLoaderAudio = factory(PxLoader));
         });
     } else if (typeof module === 'object' && module.exports) {
@@ -14,18 +14,21 @@
         // Browser globals
         root.PxLoaderAudio = factory(root.PxLoader);
     }
-}(this, function (PxLoader) {
-    function PxLoaderAudio(url, tags, priority, origin) {
-        var self = this;
-        var loader = null;
+}(this, function(PxLoader) {
+    function PxLoaderAudio(url, tags, priority, options) {
+        var self = this,
+            loader = null,
+            audio;
 
         this.readyEventName = 'canplaythrough';
         
-        this.audio = document.createElement('audio');
+        audio = this.audio = document.createElement('audio');
 
-        if(origin !== undefined) {
-            this.audio.crossOrigin = origin;
+        if (options.origin) {
+            audio.crossOrigin = options.origin;
         }
+        audio.preload = 'auto';
+        
         this.tags = tags;
         this.priority = priority;
 
@@ -33,25 +36,31 @@
             if (self.audio.readyState !== 4) {
                 return;
             }
-
-            removeEventHandlers();
-            loader.onLoad(self);
+            
+            onLoad();
         };
 
         var onLoad = function() {
-            removeEventHandlers();
             loader.onLoad(self);
+            cleanup();
         };
 
         var onError = function() {
-            removeEventHandlers();
             loader.onError(self);
+            cleanup();
         };
 
-        var removeEventHandlers = function() {
+        var onTimeout = function() {
+            loader.onTimeout(self);
+            cleanup();
+        };
+
+        var cleanup = function() {
             self.unbind('load', onLoad);
             self.unbind(self.readyEventName, onReadyStateChange);
             self.unbind('error', onError);
+            // Force browser to release connection
+            self.audio.src = '';
         };
 
         this.start = function(pxLoader) {
@@ -76,21 +85,15 @@
         // called by PxLoader to check status of audio (fallback in case
         // the event listeners are not triggered).
         this.checkStatus = function() {
-            if (self.audio.readyState !== 4) {
-                return;
-            }
-
-            removeEventHandlers();
-            loader.onLoad(self);
+            onReadyStateChange();
         };
 
         // called by PxLoader when it is no longer waiting
         this.onTimeout = function() {
-            removeEventHandlers();
             if (self.audio.readyState !== 4) {
-                loader.onLoad(self);
+                onLoad();
             } else {
-                loader.onTimeout(self);
+                onTimeout();
             }
         };
 
@@ -112,8 +115,8 @@
     }
 
     // add a convenience method to PxLoader for adding audio
-    PxLoader.prototype.addAudio = function(url, tags, priority, origin) {
-        var audioLoader = new PxLoaderAudio(url, tags, priority, origin);
+    PxLoader.prototype.addAudio = function(url, tags, priority, options) {
+        var audioLoader = new PxLoaderAudio(url, tags, priority, options);
         this.add(audioLoader);
 
         // return the audio element to the caller
