@@ -16,6 +16,8 @@
     }
 }(this, function(PxLoader) {
     function PxLoaderAudio(url, tags, priority, options) {
+        options = options || {};
+
         var self = this,
             loader = null,
             audio;
