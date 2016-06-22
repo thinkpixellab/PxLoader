@@ -436,6 +436,8 @@
     }
 }(this, function(PxLoader) {
     function PxLoaderImage(url, tags, priority, options) {
+        options = options || {};
+        
         var self = this,
             loader = null,
             img;
@@ -665,6 +667,8 @@
     }
 }(this, function(PxLoader) {
     function PxLoaderVideo(url, tags, priority, options) {
+        options = options || {};
+        
         var self = this,
             loader = null,
             video;
@@ -917,6 +921,8 @@
     }
 }(this, function(PxLoader) {
     function PxLoaderAudio(url, tags, priority, options) {
+        options = options || {};
+
         var self = this,
             loader = null,
             audio;

@@ -1,6 +1,6 @@
 {
   "name": "pxloader",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "PxLoader is a simple JavaScript library for creating preloaders and resource downloaders for HTML5 apps",
   "main": "PxLoader.js",
   "scripts": {
