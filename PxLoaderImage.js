@@ -23,7 +23,7 @@
             img;
 
         img = this.img = new Image();
-        if (options.origin) {
+        if (options && options.origin) {
             img.crossOrigin = options.origin;
         }
 
